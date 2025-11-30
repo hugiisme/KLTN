@@ -1,0 +1,14 @@
+Trong Quản lý năm học - học kỳ:
+    Có thể tạo năm học invalid bằng cách tạo năm học với ngày sai, tạo học kì với ngày sai rồi tạo năm học với ngày đúng
+    ví dụ: tạo năm học 2024-2025 rồi tạo học kì trong khoảng đó rồi sửa năm học lại thành 2010-2011
+
+Pagination sai
+Bảng update có delay 
+
+Mỗi lần update treeview lại đóng hết vào, tìm cách giữ trạng thái
+Sửa treefilter (nhất là cho org)
+
+Chưa có xóa năm học, học kỳ, tổ chức
+Delay khi load trang là quá nhiều
+
+Update thì right panel và modal chưa reload để update theo, mới chỉ có tree update
