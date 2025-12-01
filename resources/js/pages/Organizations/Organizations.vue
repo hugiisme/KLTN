@@ -196,14 +196,14 @@ function handleUpperAction(event) {
                     label: 'Thêm tổ chức mới',
                     icon: 'fa-solid fa-plus',
                     event: 'create-org',
-                    class: 'bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow',
+                    class: 'flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 shadow-sm transition-all active:scale-95 text-sm font-medium',
                     show: true,
                 },
                 {
-                    label: 'Xem thông tin',
-                    icon: 'fa-solid fa-eye',
+                    label: 'Sửa thông tin',
+                    icon: 'fa-solid fa-pen-to-square',
                     event: 'edit-org',
-                    class: 'bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow',
+                    class: 'flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 shadow-sm transition-all active:scale-95 text-sm font-medium',
                     show: () => !!selectedNode,
                 },
             ]"
