@@ -6,25 +6,24 @@ import { ref, computed, watch } from "vue";
 const props = defineProps({
     modelValue: Boolean,
     mode: { type: String, default: "create" }, // create | edit
-    initialData: { type: Object, default: null },
+    initialData: { type: Object, default: () => ({}) },
+
     academicYears: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["update:modelValue", "submit"]);
 
-// Proxy v-model
 const modalVisible = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
 });
 
-// Form data
 const formData = ref({ ...props.initialData });
 
 watch(
     () => props.initialData,
     (newData) => {
-        formData.value = { ...newData } || {};
+        formData.value = newData ? { ...newData } : {};
     },
     { immediate: true }
 );
@@ -35,6 +34,8 @@ watch(
         v-model="modalVisible"
         :title="props.mode === 'create' ? 'Thêm học kỳ' : 'Sửa học kỳ'"
     >
+        <input type="hidden" v-model="formData.id" />
+
         <FormBuilder
             :fields="[
                 {
@@ -51,7 +52,9 @@ watch(
                 { name: 'end_date', label: 'Ngày kết thúc', type: 'date' },
             ]"
             :initialData="formData"
-            @submit="emit('submit', $event)"
+            @submit="
+                (payload) => emit('submit', { ...payload, id: formData.id })
+            "
         />
     </Modal>
 </template>

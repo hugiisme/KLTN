@@ -42,22 +42,33 @@ class SemesterController extends Controller
     }
 
     // PUT /api/manage/semesters/{id}
-    public function update(Request $request, Semester $semester)
+    public function update(Request $request, $id)
     {
+        $semester = Semester::findOrFail($id);
+
         $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'start_date' => 'sometimes|required|date',
             'end_date' => 'sometimes|required|date',
+            'academic_year_id' => 'sometimes|required|integer|exists:academic_years,id',
         ]);
 
-        $semester->update($request->all());
+        // thêm academic_year_id vào list update
+        $semester->update($request->only([
+            'name',
+            'start_date',
+            'end_date',
+            'academic_year_id'
+        ]));
 
         return response()->json($semester);
     }
 
+
     // DELETE /api/manage/semesters/{id}
-    public function destroy(Semester $semester)
+    public function destroy($id)
     {
+        $semester = Semester::findOrFail($id);
         $semester->delete();
 
         return response()->json(null, 204);

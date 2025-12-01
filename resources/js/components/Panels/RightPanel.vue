@@ -35,7 +35,7 @@ const props = defineProps({
     pageSize: { type: Number, default: 10 },
 });
 
-const emit = defineEmits(["search", "filter", "sort"]);
+const emit = defineEmits(["search", "filter", "sort", "edit", "delete"]);
 
 // STATE
 const data = ref([]);
@@ -122,6 +122,8 @@ const paginatedRows = computed(() => {
             :columns="columns"
             :rows="paginatedRows"
             :page-size="pageSize"
+            @edit="(row) => emit('edit', row)"
+            @delete="(row) => emit('delete', row)"
         />
 
         <p v-else class="text-gray-500 italic">

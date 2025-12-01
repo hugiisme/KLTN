@@ -8,7 +8,7 @@ Bảng update có delay
 Mỗi lần update treeview lại đóng hết vào, tìm cách giữ trạng thái
 Sửa treefilter (nhất là cho org)
 
-Chưa có xóa năm học, học kỳ, tổ chức
+Chưa có xóa tổ chức
 Delay khi load trang là quá nhiều
 
 Update thì right panel và modal chưa reload để update theo, mới chỉ có tree update

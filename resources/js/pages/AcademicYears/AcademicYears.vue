@@ -50,7 +50,7 @@ const {
     handleYearSubmit,
     onSelectYear,
     deleteYear,
-} = useAcademicYear(selectedNode, treeData, loadTree);
+} = useAcademicYear(selectedNode, treeData, loadTree, semesterPanelRef);
 
 const {
     isSemesterModalOpen,
@@ -58,6 +58,8 @@ const {
     semesterModalInitialData,
     openCreateSemesterModal,
     handleSemesterSubmit,
+    openEditSemester,
+    deleteSemester,
 } = useSemester(
     selectedYear,
     treeData,
@@ -149,7 +151,14 @@ onMounted(() => loadTree());
                             label: 'Ngày kết thúc',
                             type: 'date',
                         },
+                        {
+                            key: 'actions',
+                            label: 'Hành động',
+                            type: 'actions',
+                        },
                     ]"
+                    @edit="openEditSemester"
+                    @delete="deleteSemester"
                 />
             </div>
         </div>

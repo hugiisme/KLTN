@@ -16,4 +16,8 @@ export default {
     async update(id, data) {
         return axios.put(`/api/manage/semesters/${id}`, data);
     },
+
+    async delete(id) {
+        return axios.delete(`/api/manage/semesters/${id}`);
+    },
 };

@@ -2,7 +2,12 @@ import { ref } from "vue";
 import Notification from "@/services/NotificationService.js";
 import AcademicYearService from "@/services/AcademicYearService.js";
 
-export default function useAcademicYear(selectedNode, treeData, reloadTree) {
+export default function useAcademicYear(
+    selectedNode,
+    treeData,
+    reloadTree,
+    semesterPanelRef
+) {
     const selectedYear = ref(null);
     const isYearModalOpen = ref(false);
     const modalMode = ref("create");
@@ -41,6 +46,8 @@ export default function useAcademicYear(selectedNode, treeData, reloadTree) {
             }
             isYearModalOpen.value = false;
             await reloadTree();
+            remapSelectedYear();
+            semesterPanelRef.value.reload();
         } catch (err) {
             console.error(err);
             Notification.send("error", "Lỗi khi lưu năm học");
@@ -65,11 +72,23 @@ export default function useAcademicYear(selectedNode, treeData, reloadTree) {
 
             isYearModalOpen.value = false;
             await reloadTree();
+            selectedYear.value = null;
+            semesterPanelRef.value.reload();
         } catch (err) {
             console.error(err);
             Notification.send("error", "Lỗi khi xoá năm học");
         }
     };
+
+    function remapSelectedYear() {
+        if (!selectedYear.value) return;
+
+        const newNode = treeData.value
+            .flatMap((year) => [year, ...(year.semesters ?? [])])
+            .find((n) => n.id === selectedYear.value.id);
+
+        selectedYear.value = newNode || null;
+    }
 
     return {
         selectedYear,

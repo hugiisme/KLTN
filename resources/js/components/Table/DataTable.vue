@@ -6,7 +6,7 @@ const props = defineProps({
     rows: Array,
 });
 
-const emit = defineEmits(["sort"]);
+const emit = defineEmits(["sort", "edit", "delete"]);
 
 const sortState = ref({
     field: null,
@@ -87,7 +87,24 @@ function getSortIcon(col) {
                         :key="col.key"
                         class="px-6 py-4 whitespace-nowrap text-base text-gray-800 font-medium"
                     >
+                        <div v-if="col.type === 'actions'" class="flex gap-2">
+                            <button
+                                class="px-3 py-1 rounded bg-yellow-200 text-yellow-800 text-sm hover:bg-yellow-300"
+                                @click.stop="emit('edit', row)"
+                            >
+                                Sửa
+                            </button>
+
+                            <button
+                                class="px-3 py-1 rounded bg-red-200 text-red-800 text-sm hover:bg-red-300"
+                                @click.stop="emit('delete', row)"
+                            >
+                                Xóa
+                            </button>
+                        </div>
+
                         <span
+                            v-else
                             :class="
                                 col.type === 'date'
                                     ? 'font-mono text-sm text-gray-900 font-bold'

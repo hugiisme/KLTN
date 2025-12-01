@@ -24,6 +24,21 @@ export default function useSemester(
         isSemesterModalOpen.value = true;
     };
 
+    const openEditSemester = (row) => {
+        if (!row) return;
+
+        semesterModalMode.value = "edit";
+        semesterModalInitialData.value = {
+            id: row.id,
+            academic_year_id: row.academic_year_id,
+            name: row.name,
+            start_date: row.start_date?.toString().slice(0, 10) || "",
+            end_date: row.end_date?.toString().slice(0, 10) || "",
+        };
+
+        isSemesterModalOpen.value = true;
+    };
+
     const handleSemesterSubmit = async (data) => {
         if (!data.academic_year_id) {
             Notification.send("error", "Năm học không được để trống");
@@ -63,7 +78,17 @@ export default function useSemester(
                 await SemesterService.create(data);
                 Notification.send("success", "Tạo học kỳ thành công");
             } else {
-                await SemesterService.update(data.id, data);
+                if (!data.id) {
+                    Notification.send("error", "ID học kỳ không xác định");
+                    return;
+                }
+
+                await SemesterService.update(data.id, {
+                    academic_year_id: data.academic_year_id,
+                    name: data.name,
+                    start_date: data.start_date,
+                    end_date: data.end_date,
+                });
                 Notification.send("success", "Cập nhật học kỳ thành công");
             }
 
@@ -84,11 +109,37 @@ export default function useSemester(
         }
     };
 
+    const deleteSemester = async (row) => {
+        if (!row?.id) return;
+        if (!confirm("Bạn có chắc muốn xoá học kỳ này?")) return;
+
+        try {
+            await SemesterService.delete(row.id);
+            Notification.send("success", "Đã xoá học kỳ");
+
+            await reloadTree();
+
+            if (semesterPanelRef.value?.reload) {
+                semesterPanelRef.value.reload();
+            }
+
+            // Expand năm học chứa học kỳ đó
+            if (treePanelRef.value?.treeView) {
+                treePanelRef.value.treeView.expandNode(row.academic_year_id);
+            }
+        } catch (err) {
+            console.error(err);
+            Notification.send("error", "Lỗi khi xoá học kỳ");
+        }
+    };
+
     return {
         isSemesterModalOpen,
         semesterModalMode,
         semesterModalInitialData,
         openCreateSemesterModal,
         handleSemesterSubmit,
+        openEditSemester,
+        deleteSemester,
     };
 }
