@@ -16,7 +16,7 @@ const props = defineProps({
     orgLevels: { type: Array, default: () => [] },
 });
 
-const emit = defineEmits(["update:modelValue", "submit"]);
+const emit = defineEmits(["update:modelValue", "submit", "delete"]);
 
 // Proxy v-model
 const modalVisible = computed({
@@ -127,6 +127,16 @@ const orgLevelOptions = computed(() => {
             ]"
             :initialData="formData"
             @submit="(data) => emit('submit', { ...data, id: formData.id })"
-        />
+        >
+            <template #actions>
+                <button
+                    v-if="mode === 'edit'"
+                    @click="$emit('delete', formData.id)"
+                    class="w-full bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 active:scale-95"
+                >
+                    <i class="fa-solid fa-trash"></i> Xóa tổ chức
+                </button>
+            </template>
+        </FormBuilder>
     </Modal>
 </template>

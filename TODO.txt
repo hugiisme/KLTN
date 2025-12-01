@@ -12,3 +12,5 @@ Chưa có xóa tổ chức
 Delay khi load trang là quá nhiều
 
 Update thì right panel và modal chưa reload để update theo, mới chỉ có tree update
+
+Nếu có 2 tổ chức cấp 1 (trường) thì tổ chức 2 sẽ lỗi ko tạo được tổ chức con

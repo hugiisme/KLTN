@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 
 const props = defineProps({
     fields: { type: Array, required: true },
@@ -8,6 +8,25 @@ const props = defineProps({
 
 const emit = defineEmits(["submit"]);
 const formData = ref({});
+const openDropdown = ref(null);
+
+function getOptionLabel(field, value) {
+    if (!field || !field.options) return "";
+    const opt = field.options.find((o) => o.value === value);
+    return opt ? opt.label : "";
+}
+
+function selectOption(field, value) {
+    formData.value[field.name] = value;
+    openDropdown.value = null;
+}
+
+function onDocClick() {
+    openDropdown.value = null;
+}
+
+onMounted(() => document.addEventListener("click", onDocClick));
+onBeforeUnmount(() => document.removeEventListener("click", onDocClick));
 
 function initForm() {
     const obj = {};
@@ -106,26 +125,44 @@ const inputClass =
                 />
 
                 <div v-if="field.type === 'select'" class="relative">
-                    <select
+                    <div
                         :class="[
                             inputClass,
-                            'appearance-none cursor-pointer bg-white',
+                            'flex items-center justify-between cursor-pointer',
                         ]"
-                        v-model="formData[field.name]"
+                        @click.stop="
+                            openDropdown =
+                                openDropdown === field.name ? null : field.name
+                        "
                     >
-                        <option
+                        <span class="truncate">{{
+                            getOptionLabel(field, formData[field.name]) ||
+                            "Chọn " + field.label
+                        }}</span>
+                        <i
+                            class="fa-solid fa-chevron-down text-xs text-gray-500 ml-2"
+                        ></i>
+                    </div>
+
+                    <div
+                        v-if="openDropdown === field.name"
+                        class="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-auto"
+                    >
+                        <div
                             v-for="opt in field.options"
                             :key="String(opt.value) + opt.label"
-                            :value="opt.value"
-                            :disabled="opt.disabled || false"
+                            class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                            :class="
+                                opt.disabled
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-gray-800'
+                            "
+                            @click.stop="
+                                !opt.disabled && selectOption(field, opt.value)
+                            "
                         >
                             {{ opt.label }}
-                        </option>
-                    </select>
-                    <div
-                        class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500"
-                    >
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
                     </div>
                 </div>
 

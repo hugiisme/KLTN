@@ -18,6 +18,7 @@ import OrgLevelService from "@/services/OrgLevelService.js";
 const treeData = ref([]);
 const selectedNode = ref(null);
 const treePanelRef = ref(null);
+const rightPanelRef = ref(null);
 
 // Dropdown data
 const orgTypes = ref([]);
@@ -83,96 +84,24 @@ const {
     onTreeFilter,
 } = useOrgTree(treeData);
 
-// Open modal: create
-async function openCreateOrgModal() {
-    if (!parentOrgs.value.length) await loadDropdowns();
-
-    const initial = {};
-    if (selectedNode.value) initial.parent_org_id = selectedNode.value.id;
-
-    modalInitialData.value = initial;
-    modalMode.value = "create";
-    isOrgModalOpen.value = true;
-}
-
-// Open modal: edit
-async function openEditOrgModal(node) {
-    if (!node) return;
-
-    if (!parentOrgs.value.length) await loadDropdowns();
-
-    try {
-        // Lấy dữ liệu chi tiết từ backend
-        const detailedNode = await OrganizationService.getById(node.id);
-        console.log("detailedNode", detailedNode);
-
-        if (!detailedNode || typeof detailedNode !== "object") {
-            Notification.send("error", "Dữ liệu tổ chức không hợp lệ");
-            return;
-        }
-
-        if (!detailedNode.id) {
-            Notification.send("error", "Dữ liệu tổ chức thiếu ID");
-            return;
-        }
-
-        // Chuẩn hóa dữ liệu modal
-        modalInitialData.value = {
-            id: detailedNode.id, // đảm bảo luôn có ID
-            name: detailedNode.name ?? "",
-            parent_org_id: detailedNode.parent?.id ?? null,
-            org_type_id: detailedNode.org_type_id ?? null,
-            org_level_id: detailedNode.org_level_id ?? null,
-            // Thêm các trường khác nếu cần
-            ...detailedNode,
-        };
-
-        modalMode.value = "edit";
-        isOrgModalOpen.value = true;
-    } catch (err) {
-        console.error(err);
-        Notification.send("error", "Lỗi khi load dữ liệu tổ chức");
-    }
-}
-
-// Submit form
-function handleOrgSubmit(formData) {
-    if (!formData || typeof formData !== "object") return;
-
-    if (modalMode.value === "create") {
-        OrganizationService.create(formData)
-            .then(() => {
-                Notification.send("success", "Lưu tổ chức thành công");
-                isOrgModalOpen.value = false;
-                loadTree();
-            })
-            .catch((err) => {
-                console.error(err);
-                Notification.send("error", "Lỗi khi lưu tổ chức");
-            });
-    } else if (modalMode.value === "edit") {
-        if (!formData.id) {
-            Notification.send("error", "Không có ID tổ chức để cập nhật");
-            return;
-        }
-
-        OrganizationService.update(formData.id, formData)
-            .then(() => {
-                Notification.send("success", "Cập nhật tổ chức thành công");
-                isOrgModalOpen.value = false;
-                loadTree();
-            })
-            .catch((err) => {
-                console.error(err);
-                Notification.send("error", "Lỗi khi cập nhật tổ chức");
-            });
-    }
-}
-
-// Select
-function onSelectOrg(node) {
-    selectedNode.value = node;
-}
+const {
+    openCreateOrgModal,
+    openEditOrgModal,
+    handleOrgSubmit,
+    onSelectOrg,
+    deleteOrg,
+} = useOrganization(
+    selectedNode,
+    treeData,
+    loadTree,
+    parentOrgs,
+    loadDropdowns,
+    treePanelRef,
+    isOrgModalOpen,
+    modalMode,
+    modalInitialData,
+    rightPanelRef
+);
 
 onMounted(async () => {
     await loadDropdowns();
@@ -233,6 +162,7 @@ function handleUpperAction(event) {
             />
 
             <RightPanel
+                ref="rightPanelRef"
                 title="Danh sách tổ chức con"
                 icon="fa-solid fa-list"
                 :selected="selectedNode"
@@ -242,9 +172,12 @@ function handleUpperAction(event) {
                     { key: 'label', label: 'Tên tổ chức' },
                     { key: 'org_type.name', label: 'Loại' },
                     { key: 'org_level.equivalent_name', label: 'Cấp' },
+                    { key: 'actions', label: 'Hành động', type: 'actions' },
                 ]"
                 :filters="[{ name: 'label', label: 'Tên' }]"
                 :sorters="[{ name: 'label', label: 'Tên' }]"
+                @edit="openEditOrgModal"
+                @delete="deleteOrg"
             />
         </div>
     </div>
@@ -255,7 +188,8 @@ function handleUpperAction(event) {
         :initialData="modalInitialData"
         :org-types="orgTypes"
         :org-levels="orgLevels"
-        :parent-organizations="parentOrgs"
+        :parentOrganizations="parentOrgs"
         @submit="handleOrgSubmit"
+        @delete="(id) => deleteOrg({ id })"
     />
 </template>
