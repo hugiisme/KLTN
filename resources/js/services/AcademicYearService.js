@@ -12,4 +12,8 @@ export default {
     async updateYear(id, data) {
         return axios.put(`/api/manage/academic-years/${id}`, data);
     },
+
+    async deleteYear(id) {
+        return axios.delete(`/api/manage/academic-years/${id}`);
+    },
 };

@@ -176,13 +176,18 @@ const inputClass =
             </template>
         </div>
 
-        <button
-            @click="sendForm"
-            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-        >
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span>Lưu dữ liệu</span>
-        </button>
+        <div class="flex flex-col gap-3 mt-4">
+            <button
+                @click="sendForm"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+            >
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Lưu dữ liệu</span>
+            </button>
+
+            <!-- Slot nút custom -->
+            <slot name="actions"></slot>
+        </div>
     </div>
 </template>
 
