@@ -25,17 +25,6 @@ watch(
     },
     { immediate: true }
 );
-
-async function deleteYear() {
-    if (!modalInitialData.id) return;
-
-    if (!confirm("Bạn có chắc muốn xoá năm học này?")) return;
-
-    await AcademicYearService.deleteYear(modalInitialData.id);
-    Notification.send("success", "Đã xoá năm học");
-    loadTree();
-    isYearModalOpen.value = false;
-}
 </script>
 
 <template>
@@ -55,11 +44,10 @@ async function deleteYear() {
             <template #actions>
                 <button
                     v-if="mode === 'edit'"
-                    @click="deleteYear"
+                    @click="$emit('delete')"
                     class="w-full bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 active:scale-95"
                 >
-                    <i class="fa-solid fa-trash"></i>
-                    Xóa năm học
+                    <i class="fa-solid fa-trash"></i> Xóa năm học
                 </button>
             </template>
         </FormBuilder>

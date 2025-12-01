@@ -49,6 +49,7 @@ const {
     openEditYearModal,
     handleYearSubmit,
     onSelectYear,
+    deleteYear,
 } = useAcademicYear(selectedNode, treeData, loadTree);
 
 const {
@@ -159,6 +160,7 @@ onMounted(() => loadTree());
         :mode="modalMode"
         :initialData="modalInitialData"
         @submit="handleYearSubmit"
+        @delete="deleteYear"
     ></YearModal>
     <SemesterModal
         v-model="isSemesterModalOpen"

@@ -66,4 +66,15 @@ class AcademicYearController extends Controller
 
         return response()->json($year);
     }
+
+    public function destroy($id)
+    {
+        $year = AcademicYear::findOrFail($id);
+        $year->delete();
+
+        return response()->json([
+            'message' => 'Xóa năm học thành công',
+            'type' => "success",
+        ]);
+    }
 }

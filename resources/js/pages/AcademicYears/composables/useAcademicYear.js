@@ -54,6 +54,23 @@ export default function useAcademicYear(selectedNode, treeData, reloadTree) {
             selectedYear.value = node.academic_year;
     };
 
+    const deleteYear = async () => {
+        if (!selectedYear.value?.id) return;
+
+        if (!confirm("Bạn có chắc muốn xoá năm học này?")) return;
+
+        try {
+            await AcademicYearService.deleteYear(selectedYear.value.id);
+            Notification.send("success", "Đã xoá năm học");
+
+            isYearModalOpen.value = false;
+            await reloadTree();
+        } catch (err) {
+            console.error(err);
+            Notification.send("error", "Lỗi khi xoá năm học");
+        }
+    };
+
     return {
         selectedYear,
         isYearModalOpen,
@@ -63,5 +80,6 @@ export default function useAcademicYear(selectedNode, treeData, reloadTree) {
         openEditYearModal,
         handleYearSubmit,
         onSelectYear,
+        deleteYear,
     };
 }
