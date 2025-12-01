@@ -25,7 +25,7 @@ defineExpose({ treeView });
 
 <template>
     <div
-        class="h-full w-80 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col overflow-hidden"
+        class="h-full w-80 bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden"
     >
         <div class="p-3 border-b border-gray-100 bg-gray-50">
             <h2

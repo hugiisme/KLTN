@@ -79,7 +79,7 @@ const paginatedRows = computed(() => {
 
 <template>
     <div
-        class="flex-1 bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col gap-4 h-full overflow-hidden"
+        class="flex-1 bg-white border border-gray-300 rounded-xl shadow-sm p-5 flex flex-col gap-4 h-full overflow-hidden"
     >
         <!-- HEADER -->
         <div

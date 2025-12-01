@@ -24,7 +24,7 @@ const emit = defineEmits(["action"]);
 
 <template>
     <div
-        class="flex justify-between items-center bg-white border border-gray-200 rounded-xl shadow-sm p-4"
+        class="flex justify-between items-center bg-white border border-gray-300 rounded-xl shadow-sm p-4"
     >
         <!-- Left -->
         <div class="flex items-center gap-3">
