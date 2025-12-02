@@ -32,10 +32,64 @@ const submitLogin = async () => {
     }
 
     try {
+        // Ensure CSRF cookie/token is set (useful after logout or cross-origin dev)
+        try {
+            await axios.get("/sanctum/csrf-cookie");
+        } catch (e) {
+            // ignore — some setups may not have sanctum, fallback to existing meta token
+            console.warn("Could not fetch CSRF cookie:", e);
+        }
+
+        // Ensure axios will send the X-XSRF-TOKEN header by explicitly reading
+        // the XSRF-TOKEN cookie and setting the header. This avoids cases where
+        // the browser has the cookie but axios doesn't pick it up automatically
+        // (cross-origin/dev setups).
+        try {
+            const getCookie = (name) => {
+                const match = document.cookie.match(
+                    new RegExp("(^|; )" + name + "=([^;]*)")
+                );
+                return match ? decodeURIComponent(match[2]) : null;
+            };
+
+            const xsrf = getCookie("XSRF-TOKEN");
+            if (xsrf) {
+                axios.defaults.headers.common["X-XSRF-TOKEN"] = xsrf;
+            }
+        } catch (e) {
+            console.warn("Could not set XSRF header manually:", e);
+        }
+
         const response = await axios.post("/api/login", {
             username: username.value,
             password: password.value,
         });
+
+        // Lưu thông tin user vào sessionStorage để sử dụng phía client
+        try {
+            if (response.data && response.data.user) {
+                sessionStorage.setItem(
+                    "user",
+                    JSON.stringify(response.data.user)
+                );
+            } else {
+                // Nếu backend không trả về user, gọi /api/me để lấy thông tin
+                try {
+                    const me = await axios.get("/api/me");
+                    if (me.data && me.data.user) {
+                        sessionStorage.setItem(
+                            "user",
+                            JSON.stringify(me.data.user)
+                        );
+                    }
+                } catch (e) {
+                    console.warn("Không lấy được /api/me:", e);
+                }
+            }
+        } catch (e) {
+            console.error("Lỗi khi lưu user vào sessionStorage:", e);
+        }
+
         Notification.send("success", "Đăng nhập thành công!");
         window.location.href = "/";
     } catch (err) {
