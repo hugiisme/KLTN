@@ -10,12 +10,46 @@ use App\Models\OrgLevel;
 class OrganizationController extends Controller
 {
     /**
-     * Trả về cây tổ chức
+     * GET /api/manage/organizations
+     */
+    public function index(Request $request)
+    {
+        $query = Organization::with('type', 'level', 'parent');
+
+        // SEARCH
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        // FILTER: filter_field + filter_value
+        if ($request->filled('filter_field') && $request->filled('filter_value')) {
+            $query->where($request->filter_field, $request->filter_value);
+        }
+
+        // SORTING
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
+        // PAGINATION
+        $perPage = (int) ($request->per_page ?? 10);
+        $items = $query->paginate($perPage);
+
+        return response()->json($items);
+    }
+
+    /**
+     * TREE
      */
     public function tree()
     {
-        // Lấy các org cha (parent_org_id null) và eager load children
-        $organizations = Organization::with('children', 'type', 'level')->whereNull('parent_org_id')->get();
+        $organizations = Organization::with('children', 'type', 'level')
+            ->whereNull('parent_org_id')
+            ->get();
 
         $tree = $organizations->map(function ($org) {
             return $this->formatNode($org);
@@ -24,9 +58,6 @@ class OrganizationController extends Controller
         return response()->json($tree);
     }
 
-    /**
-     * Format node cho tree
-     */
     protected function formatNode($org)
     {
         return [
@@ -42,9 +73,6 @@ class OrganizationController extends Controller
         ];
     }
 
-    /**
-     * Hiển thị chi tiết tổ chức
-     */
     public function show($id)
     {
         $org = Organization::with('parent', 'type', 'level', 'children')->find($id);
@@ -56,16 +84,13 @@ class OrganizationController extends Controller
         return response()->json($org);
     }
 
-    /**
-     * Tạo tổ chức mới
-     */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|unique:organizations,name',
+            'name'          => 'required|string|unique:organizations,name',
             'parent_org_id' => 'nullable|exists:organizations,id',
-            'org_type_id' => 'required|exists:org_types,id',
-            'org_level_id' => 'required|exists:org_levels,id',
+            'org_type_id'   => 'required|exists:org_types,id',
+            'org_level_id'  => 'required|exists:org_levels,id',
         ]);
 
         $org = Organization::create($data);
@@ -77,18 +102,15 @@ class OrganizationController extends Controller
         ], 201);
     }
 
-    /**
-     * Cập nhật tổ chức
-     */
     public function update(Request $request, $id)
     {
         $org = Organization::findOrFail($id);
 
         $data = $request->validate([
-            'name' => 'required|string|max:255|unique:organizations,name,' . $org->id,
+            'name'          => 'required|string|max:255|unique:organizations,name,' . $org->id,
             'parent_org_id' => 'nullable|exists:organizations,id',
-            'org_type_id' => 'required|exists:org_types,id',
-            'org_level_id' => 'required|exists:org_levels,id',
+            'org_type_id'   => 'required|exists:org_types,id',
+            'org_level_id'  => 'required|exists:org_levels,id',
         ]);
 
         $org->update($data);
@@ -96,9 +118,6 @@ class OrganizationController extends Controller
         return response()->json($org);
     }
 
-    /**
-     * Xóa tổ chức
-     */
     public function destroy($id)
     {
         $org = Organization::findOrFail($id);
@@ -110,17 +129,11 @@ class OrganizationController extends Controller
         ]);
     }
 
-    /**
-     * Lấy danh sách loại tổ chức cho dropdown
-     */
     public function getTypes()
     {
         return response()->json(OrgType::all());
     }
 
-    /**
-     * Lấy danh sách cấp tổ chức cho dropdown
-     */
     public function getLevels()
     {
         return response()->json(OrgLevel::all());

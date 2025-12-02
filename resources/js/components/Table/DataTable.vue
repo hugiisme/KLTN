@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 const props = defineProps({
-    columns: Array, // [{ key:'name', label:'Tên', sortable:true }]
+    columns: Array, // [{ key:'created_at', label:'Ngày tạo', type: 'date', sortable:true }]
     rows: Array,
 });
 
@@ -12,6 +12,23 @@ const sortState = ref({
     field: null,
     direction: null, // asc | desc | null
 });
+
+function formatDate(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    // Kiểm tra nếu date không hợp lệ thì trả về giá trị gốc
+    if (isNaN(date.getTime())) return value;
+
+    // Format theo kiểu Việt Nam: dd/mm/yyyy
+    return new Intl.DateTimeFormat("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        // Bỏ comment dòng dưới nếu muốn hiện cả giờ phút
+        // hour: "2-digit", minute: "2-digit"
+    }).format(date);
+}
+// ---------------------------------------
 
 function getValue(obj, key) {
     if (!obj || key == null) return "";
@@ -94,7 +111,6 @@ function getSortIcon(col) {
                             >
                                 Sửa
                             </button>
-
                             <button
                                 class="px-3 py-1 rounded bg-red-200 text-red-800 text-sm hover:bg-red-300"
                                 @click.stop="emit('delete', row)"
@@ -111,7 +127,11 @@ function getSortIcon(col) {
                                     : ''
                             "
                         >
-                            {{ getValue(row, col.key) }}
+                            {{
+                                col.type === "date"
+                                    ? formatDate(getValue(row, col.key))
+                                    : getValue(row, col.key)
+                            }}
                         </span>
                     </td>
                 </tr>

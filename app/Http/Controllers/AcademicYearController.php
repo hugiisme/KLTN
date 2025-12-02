@@ -7,6 +7,42 @@ use App\Models\AcademicYear;
 
 class AcademicYearController extends Controller
 {
+    /**
+     * GET /api/manage/academic-years
+     */
+    public function index(Request $request)
+    {
+        $query = AcademicYear::query();
+
+        // SEARCH
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        // CUSTOM FILTER
+        if ($request->filled('filter_field') && $request->filled('filter_value')) {
+            $query->where($request->filter_field, $request->filter_value);
+        }
+
+        // SORTING
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
+        // PAGINATION
+        $perPage = (int) ($request->per_page ?? 10);
+        $items = $query->paginate($perPage);
+
+        return response()->json($items);
+    }
+
+    /**
+     * Tree API
+     */
     public function tree()
     {
         $years = AcademicYear::with('semesters')->orderBy('start_date')->get();

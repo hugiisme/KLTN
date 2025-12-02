@@ -9,50 +9,98 @@ import Pagination from "@/components/Table/Pagination.vue";
 const props = defineProps({
     title: { type: String, required: true },
     icon: { type: String, default: "fa-solid fa-list" },
-
-    /** Object được chọn (hiện label ở góc phải) */
     selected: { type: Object, default: null },
-
-    /** API để load bảng */
     apiUrl: { type: String, required: true },
+    apiParams: { type: Function, default: () => ({}) },
 
-    /** Hàm sinh params từ selected */
-    apiParams: {
-        type: Function,
-        default: (selected) => ({}),
-    },
-
-    /** cấu hình lọc/sắp xếp */
     filters: { type: Array, default: () => [] },
     sorters: { type: Array, default: () => [] },
 
-    /** cấu hình bảng */
     columns: { type: Array, required: true },
 
-    /** rows custom (nếu muốn override API) */
     customRows: { type: Array, default: null },
-
     pageSize: { type: Number, default: 10 },
 });
 
-const emit = defineEmits(["search", "filter", "sort", "edit", "delete"]);
+const emit = defineEmits(["edit", "delete"]);
 
-// STATE
-const data = ref([]);
+// DATA
+const rows = ref([]);
+const meta = ref({
+    current_page: 1,
+    last_page: 1,
+    total: 0,
+    from: null,
+    to: null,
+    per_page: props.pageSize,
+});
+
 const currentPage = ref(1);
+const searchText = ref("");
+const selectedFilter = ref("");
+const sorter = ref({ field: "", direction: "asc" });
 
-// FETCH API
+const tableSort = ref({ field: null, direction: null });
+
 async function reload() {
-    if (!props.selected) return;
+    if (!props.selected && !props.customRows) {
+        rows.value = [];
+        meta.value = {
+            current_page: 1,
+            last_page: 1,
+            per_page: props.pageSize,
+            total: 0,
+        };
+        return;
+    }
 
-    const params = props.apiParams(props.selected);
+    if (props.customRows) {
+        rows.value = props.customRows;
+        meta.value = {
+            current_page: 1,
+            last_page: 1,
+            per_page: props.customRows.length,
+            total: props.customRows.length,
+            from: 1,
+            to: props.customRows.length,
+        };
+        return;
+    }
+
+    const base = props.apiParams(props.selected) || {};
+
+    const params = {
+        ...base,
+        page: currentPage.value,
+        per_page: props.pageSize,
+
+        search: searchText.value || undefined,
+
+        filter_field: selectedFilter.value || undefined,
+        filter_value: selectedFilter.value ? searchText.value : undefined,
+
+        sort_field: tableSort.value.field || sorter.value.field || undefined,
+        sort_direction:
+            tableSort.value.direction || sorter.value.direction || "asc",
+    };
 
     const res = await axios.get(props.apiUrl, { params });
-    data.value = res.data;
+
+    rows.value = res.data.data;
+
+    meta.value = {
+        current_page: res.data.current_page,
+        last_page: res.data.last_page,
+        per_page: res.data.per_page,
+        total: res.data.total,
+        from: res.data.from,
+        to: res.data.to,
+    };
 }
+
 defineExpose({ reload });
 
-// LOAD AGAIN WHEN selected CHANGED
+// WATCH
 watch(
     () => props.selected,
     () => {
@@ -62,37 +110,48 @@ watch(
     { immediate: true }
 );
 
-// PAGINATION
-const totalPages = computed(() =>
-    Math.max(
-        1,
-        Math.ceil((props.customRows ?? data.value).length / props.pageSize)
-    )
-);
+watch(currentPage, reload);
 
-const paginatedRows = computed(() => {
-    const rows = props.customRows ?? data.value;
-    const start = (currentPage.value - 1) * props.pageSize;
-    return rows.slice(start, start + props.pageSize);
-});
+// EVENTS
+function onSearch(v) {
+    searchText.value = v.trim();
+    currentPage.value = 1;
+    reload();
+}
+
+function onFilter(fieldName) {
+    selectedFilter.value = fieldName || "";
+    currentPage.value = 1;
+    reload();
+}
+
+function onSorter(obj) {
+    sorter.value = obj || { field: "", direction: "asc" };
+    currentPage.value = 1;
+    reload();
+}
+
+function onTableSort(info) {
+    tableSort.value = info || { field: null, direction: null };
+    currentPage.value = 1;
+    reload();
+}
+
+const totalPages = computed(() => meta.value.last_page || 1);
 </script>
 
 <template>
     <div
         class="flex-1 bg-white border border-gray-300 rounded-xl shadow-sm p-5 flex flex-col gap-4 h-full overflow-hidden"
     >
-        <!-- HEADER -->
         <div
-            class="flex items-center justify-between border-b border-gray-100 pb-3"
+            class="flex items-center justify-between border-b border-gray-500 pb-3"
         >
             <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
-                <span class="text-blue-600">
-                    <i :class="icon"></i>
-                </span>
+                <span class="text-blue-600"><i :class="icon"></i></span>
                 <span>{{ title }}</span>
             </h3>
 
-            <!-- label trái phải -->
             <span
                 v-if="selected"
                 class="text-sm px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-medium"
@@ -107,32 +166,29 @@ const paginatedRows = computed(() => {
             </span>
         </div>
 
-        <!-- FILTER + SORT -->
         <TableFilterSorter
             :filters="filters"
             :sorters="sorters"
-            @search="(txt) => emit('search', txt)"
-            @filter="(f) => emit('filter', f)"
-            @sort="(s) => emit('sort', s)"
+            @search="onSearch"
+            @filter="onFilter"
+            @sort="onSorter"
         />
 
-        <!-- TABLE -->
         <DataTable
-            v-if="selected"
+            v-if="selected || customRows"
             :columns="columns"
-            :rows="paginatedRows"
-            :page-size="pageSize"
-            @edit="(row) => emit('edit', row)"
-            @delete="(row) => emit('delete', row)"
+            :rows="rows"
+            @edit="emit('edit', $event)"
+            @delete="emit('delete', $event)"
+            @sort="onTableSort"
         />
 
         <p v-else class="text-gray-500 italic">
             Vui lòng chọn một mục để xem danh sách.
         </p>
 
-        <!-- PAGINATION -->
         <Pagination
-            v-if="selected"
+            v-if="(selected || customRows) && totalPages > 1"
             v-model:currentPage="currentPage"
             :totalPages="totalPages"
         />

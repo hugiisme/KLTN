@@ -9,7 +9,7 @@ const props = defineProps({
 
 <template>
     <header
-        class="w-full border-b bg-white px-6 py-4 flex items-center justify-between"
+        class="w-full border-b border-gray-500 bg-white px-6 py-4 flex items-center justify-between"
     >
         <!-- Left side: Title -->
         <h1 class="text-xl font-semibold text-gray-800">

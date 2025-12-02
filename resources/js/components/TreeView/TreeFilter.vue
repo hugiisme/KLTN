@@ -60,7 +60,7 @@ watch(selectedType, (val, oldVal) => {
                     type="text"
                     v-model="searchText"
                     placeholder="Nhập tên..."
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                    class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
                 />
                 <span class="absolute right-3 top-2.5 text-gray-400 text-xs">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -75,7 +75,7 @@ watch(selectedType, (val, oldVal) => {
             <div class="flex gap-2">
                 <select
                     v-model="selectedSortField"
-                    class="flex-1 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                    class="flex-1 border border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
                 >
                     <option
                         v-for="field in fields"
@@ -88,7 +88,7 @@ watch(selectedType, (val, oldVal) => {
 
                 <select
                     v-model="sortDirection"
-                    class="w-28 border border-gray-300 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                    class="w-28 border border-gray-400 rounded-lg px-2 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
                 >
                     <option value="asc">Tăng dần</option>
                     <option value="desc">Giảm dần</option>
@@ -102,7 +102,7 @@ watch(selectedType, (val, oldVal) => {
             >
             <select
                 v-model="selectedType"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+                class="w-full border border-gray-400 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
             >
                 <option value="all">Tất cả</option>
                 <option v-for="t in types" :key="t.value" :value="t.value">

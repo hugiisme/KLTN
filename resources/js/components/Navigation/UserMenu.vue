@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import Notification from "../../services/NotificationService.js";
+import LogoutService from "@/services/LogoutService.js";
 const csrfToken = ref("");
 
 onMounted(() => {
@@ -9,19 +10,7 @@ onMounted(() => {
         ?.getAttribute("content");
 });
 
-function logout() {
-    window.axios
-        .post("/logout")
-        .then(() => {
-            Notification.send("success", "Đăng xuất thành công!");
-            // Redirect cứng để xóa sạch state của Vue
-            window.location.href = "/login";
-        })
-        .catch((error) => {
-            console.error("Logout failed", error);
-            Notification.send("error", "Đăng xuất thất bại");
-        });
-}
+const logout = LogoutService.logout;
 </script>
 <template>
     <div class="relative group py-3">

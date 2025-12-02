@@ -1,8 +1,11 @@
 <script setup>
+import LogoutService from "@/services/LogoutService.js";
 const props = defineProps({
     tabs: Array,
     activeTab: String,
 });
+
+const logout = LogoutService.logout;
 
 const emit = defineEmits(["update:activeTab"]);
 </script>
@@ -34,6 +37,7 @@ const emit = defineEmits(["update:activeTab"]);
         <div class="p-4 border-t border-gray-200">
             <button
                 class="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium px-4 py-2"
+                @click="logout"
             >
                 <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
             </button>

@@ -7,20 +7,44 @@ use App\Models\Semester;
 
 class SemesterController extends Controller
 {
-    // GET /api/manage/semesters
+    /**
+     * GET /api/manage/semesters
+     */
     public function index(Request $request)
     {
-        logger('Query params:', $request->all());
         $query = Semester::query();
 
-        if ($request->has('academic_year_id')) {
+        // FILTER: academic_year_id
+        if ($request->filled('academic_year_id')) {
             $query->where('academic_year_id', $request->academic_year_id);
         }
 
-        return response()->json($query->get());
+        // SEARCH: search on name (customize as needed)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        // CUSTOM FILTER: filter_field + filter_value
+        if ($request->filled('filter_field') && $request->filled('filter_value')) {
+            $query->where($request->filter_field, $request->filter_value);
+        }
+
+        // SORTING
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
+        // PAGINATION
+        $perPage = (int) ($request->per_page ?? 10);
+        $items = $query->paginate($perPage);
+
+        return response()->json($items);
     }
 
-    // POST /api/manage/semesters
     public function store(Request $request)
     {
         $request->validate([
@@ -35,25 +59,22 @@ class SemesterController extends Controller
         return response()->json($semester, 201);
     }
 
-    // GET /api/manage/semesters/{id}
     public function show(Semester $semester)
     {
         return response()->json($semester);
     }
 
-    // PUT /api/manage/semesters/{id}
     public function update(Request $request, $id)
     {
         $semester = Semester::findOrFail($id);
 
         $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'start_date' => 'sometimes|required|date',
-            'end_date' => 'sometimes|required|date',
+            'name'          => 'sometimes|required|string|max:255',
+            'start_date'    => 'sometimes|required|date',
+            'end_date'      => 'sometimes|required|date',
             'academic_year_id' => 'sometimes|required|integer|exists:academic_years,id',
         ]);
 
-        // thêm academic_year_id vào list update
         $semester->update($request->only([
             'name',
             'start_date',
@@ -64,8 +85,6 @@ class SemesterController extends Controller
         return response()->json($semester);
     }
 
-
-    // DELETE /api/manage/semesters/{id}
     public function destroy($id)
     {
         $semester = Semester::findOrFail($id);
