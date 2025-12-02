@@ -3,6 +3,9 @@ import { ref } from "vue";
 import LoginInput from "./LoginInput.vue";
 import NotificationList from "@/components/Notifications/NotificationList.vue";
 import Notification from "@/services/NotificationService.js";
+import axios from "axios";
+axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
 
 const username = ref("");
 const password = ref("");
@@ -32,7 +35,8 @@ const submitLogin = async () => {
     }
 
     try {
-        const response = await axios.post("/api/login", {
+        await axios.get("/sanctum/csrf-cookie");
+        const response = await axios.post("/login", {
             username: username.value,
             password: password.value,
         });

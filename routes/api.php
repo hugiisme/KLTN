@@ -12,9 +12,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
-
 Route::post('/log-notification', function (Request $request) {
     $type = strtoupper($request->type);
     $message = $request->message;

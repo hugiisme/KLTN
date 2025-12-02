@@ -30,6 +30,11 @@ class AuthController extends Controller
 
         Auth::login($user);
 
+        $request->session()->regenerate();
+
+        // (Tùy chọn) Nếu bạn muốn lưu thêm thông tin tùy chỉnh vào session
+        // $request->session()->put('key', 'value');
+
         return response()->json(
             [
                 'message' => 'Đăng nhập thành công',
@@ -45,6 +50,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Đăng xuất thành công'], 200);
     }
