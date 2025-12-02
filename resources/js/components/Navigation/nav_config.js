@@ -3,51 +3,20 @@ export default [
         name: "Trang chủ",
         url: "/",
     },
-
-    // ================== QUẢN TRỊ ==================
     {
-        name: "Quản trị hệ thống",
+        name: "Quản trị",
         url: "",
         children: [
             {
-                name: "Năm học – Học kỳ",
+                name: "Quản lý năm học",
                 url: "/manage/academic_years",
             },
             {
-                name: "Tổ chức",
+                name: "Quản lý tổ chức",
                 url: "/manage/organizations",
-            },
-            {
-                name: "Người dùng",
-                url: "/manage/users",
-            },
-            {
-                name: "Nhóm người dùng",
-                url: "/manage/user-groups",
-            },
-
-            {
-                name: "Nghiệp vụ",
-                url: "",
-                children: [
-                    {
-                        name: "Hoạt động",
-                        url: "/manage/activities",
-                    },
-                    {
-                        name: "Thi đua",
-                        url: "/manage/awards",
-                    },
-                    {
-                        name: "Nghiên cứu khoa học",
-                        url: "/manage/research",
-                    },
-                ],
             },
         ],
     },
-
-    // ================== HOẠT ĐỘNG ==================
     {
         name: "Hoạt động",
         url: "/activities",
@@ -58,43 +27,39 @@ export default [
             },
             {
                 name: "Hoạt động của tôi",
-                url: "/activities/my-activities",
+                url: "/activities/my-activities", // Xem lịch sử, nộp minh chứng hoạt động
             },
             {
-                name: "Đề tài NCKH",
-                url: "/activities/research",
+                name: "Nghiên cứu khoa học",
+                url: "/activities/research", // Đăng ký và quản lý đề tài NCKH
             },
         ],
     },
-
-    // ================== TỔ CHỨC ==================
     {
-        name: "CLB – Đội – Nhóm",
+        name: "Tổ chức & CLB",
         url: "/organizations",
         children: [
             {
-                name: "Khám phá CLB",
-                url: "/organizations/directory",
+                name: "Danh bạ CLB/Đội/Nhóm",
+                url: "/organizations/directory", // Nơi đăng ký tham gia CLB (is_exclusive = false)
             },
             {
-                name: "Tổ chức tôi tham gia",
-                url: "/organizations/my-orgs",
+                name: "Tổ chức của tôi",
+                url: "/organizations/my-orgs", // Xem các tổ chức mình đang là thành viên
             },
         ],
     },
-
-    // ================== Khen thưởng ==================
     {
         name: "Thi đua & Khen thưởng",
         url: "/awards",
         children: [
             {
-                name: "Các đợt thi đua",
-                url: "/awards/rounds",
+                name: "Đợt thi đua",
+                url: "/awards/rounds", // Xem và nộp hồ sơ xét duyệt (SV5T,...)
             },
             {
                 name: "Thành tích của tôi",
-                url: "/awards/my-achievements",
+                url: "/awards/my-achievements", // Xem các danh hiệu đã đạt được
             },
         ],
     },

@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/pages/Home/Home.vue";
-import AcademicYears from "@/pages/AcademicYears/AcademicYears.vue";
-import Organizations from "@/pages/Organizations/Organizations.vue";
-import Account from "@/pages/Accounts/Account.vue";
+import Home from "../pages/Home/Home.vue";
+import AcademicYears from "../pages/AcademicYears/AcademicYears.vue";
+import Organizations from "../pages/Organizations/Organizations.vue";
+
 const routes = [
     {
         path: "/",
@@ -18,11 +18,6 @@ const routes = [
         path: "/manage/organizations",
         component: Organizations,
         meta: { title: "Quản lý tổ chức" },
-    },
-    {
-        path: "/me",
-        component: Account,
-        meta: { title: "Tài khoản" },
     },
 ];
 
