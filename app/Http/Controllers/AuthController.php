@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -31,6 +32,11 @@ class AuthController extends Controller
         Auth::login($user);
 
         $request->session()->regenerate();
+
+        Log::info('=== LOGIN SUCCESS ===');
+        Log::info('User ID logged in: ' . Auth::id());
+        Log::info('Generated Session ID: ' . $request->session()->getId());
+        Log::info('Session Config Domain: ' . config('session.domain'));
 
         // (Tùy chọn) Nếu bạn muốn lưu thêm thông tin tùy chỉnh vào session
         // $request->session()->put('key', 'value');

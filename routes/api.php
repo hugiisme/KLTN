@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\AccountController;
 
 Route::post('/log-notification', function (Request $request) {
     $type = strtoupper($request->type);
@@ -42,9 +43,11 @@ Route::get('/manage/org-types', [OrgTypeController::class, 'index']);
 Route::get('/manage/org-levels', [OrgLevelController::class, 'index']);
 
 // user profile
-Route::get('/me', [ProfileController::class, 'profile']);
-Route::put('/me', [ProfileController::class, 'updateProfile']);
-Route::put('/me/password', [ProfileController::class, 'changePassword']);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/me', [AccountController::class, 'me']);
+//     Route::put('/me', [AccountController::class, 'updateAccount']);
+//     Route::put('/me/password', [AccountController::class, 'changePassword']);
+// });
 
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/user/{id}', [UserController::class, 'show']);

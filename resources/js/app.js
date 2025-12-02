@@ -7,6 +7,10 @@ import Login from "./pages/Login/Login.vue";
 import App from "./App.vue";
 import router from "./router";
 
+import axios from "axios";
+axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
+
 if (document.querySelector("#login-app")) {
     const app = createApp(Login);
     pinia.use(piniaPluginPersistedstate);
