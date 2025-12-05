@@ -43,7 +43,7 @@ const sorter = ref({ field: "", direction: "asc" });
 const tableSort = ref({ field: null, direction: null });
 
 async function reload() {
-    if (!props.selected && !props.customRows) {
+    if (!props.selected && props.customRows === null) {
         rows.value = [];
         meta.value = {
             current_page: 1,
@@ -54,7 +54,7 @@ async function reload() {
         return;
     }
 
-    if (props.customRows) {
+    if (props.customRows !== null) {
         rows.value = props.customRows;
         meta.value = {
             current_page: 1,
@@ -111,6 +111,16 @@ watch(
 );
 
 watch(currentPage, reload);
+
+watch(
+    () => props.customRows,
+    () => {
+        if (props.customRows) {
+            reload();
+        }
+    },
+    { deep: true }
+);
 
 // EVENTS
 function onSearch(v) {

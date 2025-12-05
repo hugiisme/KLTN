@@ -24,7 +24,9 @@ const isActive = computed(() => {
             :href="item.url"
             class="px-4 py-4 text-gray-700 hover:text-blue-600 whitespace-nowrap block rounded-lg transition-colors duration-200 hover:bg-gray-50"
             :class="[
-                isActive ? 'bg-blue-50 text-blue-700 font-bold' : 'font-medium',
+                isActive
+                    ? 'bg-blue-100 text-blue-700 font-bold'
+                    : 'font-medium',
             ]"
         >
             {{ item.name }}

@@ -142,6 +142,7 @@ function handleUpperAction(event) {
         <div class="flex h-full gap-4">
             <LeftPanel
                 ref="treePanelRef"
+                treeLabel="Danh sách tổ chức"
                 :treeData="treeToRender"
                 :selected="selectedNode"
                 :sortFields="[

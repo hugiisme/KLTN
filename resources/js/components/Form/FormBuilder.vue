@@ -8,6 +8,7 @@ const props = defineProps({
 
 const emit = defineEmits(["submit"]);
 const formData = ref({});
+const errors = ref({});
 const openDropdown = ref(null);
 
 function getOptionLabel(field, value) {
@@ -23,6 +24,44 @@ function selectOption(field, value) {
 
 function onDocClick() {
     openDropdown.value = null;
+}
+
+function validateField(field) {
+    const value = formData.value[field.name];
+    const fieldErrors = [];
+
+    // Check required
+    if (field.required && (!value || value === "")) {
+        fieldErrors.push(`${field.label} là bắt buộc`);
+    }
+
+    // Password validation
+    if (field.type === "password" && value) {
+        if (value.length < 6) {
+            fieldErrors.push(`${field.label} phải có ít nhất 6 kí tự`);
+        }
+    }
+
+    // Email validation
+    if (field.type === "email" && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+            fieldErrors.push(`${field.label} không hợp lệ`);
+        }
+    }
+
+    errors.value[field.name] = fieldErrors;
+    return fieldErrors.length === 0;
+}
+
+function validateForm() {
+    let isValid = true;
+    for (const field of props.fields) {
+        if (!validateField(field)) {
+            isValid = false;
+        }
+    }
+    return isValid;
 }
 
 onMounted(() => document.addEventListener("click", onDocClick));
@@ -59,6 +98,7 @@ function initForm() {
         }
     }
     formData.value = obj;
+    errors.value = {};
 }
 
 initForm();
@@ -72,6 +112,9 @@ watch(
 );
 
 function sendForm() {
+    if (!validateForm()) {
+        return;
+    }
     emit("submit", { ...formData.value });
 }
 
@@ -102,6 +145,17 @@ const inputClass =
                 <input
                     v-if="field.type === 'text'"
                     type="text"
+                    :class="inputClass"
+                    v-model="formData[field.name]"
+                    :placeholder="
+                        field.placeholder ||
+                        'Nhập ' + field.label.toLowerCase() + '...'
+                    "
+                />
+
+                <input
+                    v-if="field.type === 'password'"
+                    type="password"
                     :class="inputClass"
                     v-model="formData[field.name]"
                     :placeholder="

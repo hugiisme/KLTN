@@ -3,6 +3,8 @@ import Home from "@/pages/Home/Home.vue";
 import AcademicYears from "@/pages/AcademicYears/AcademicYears.vue";
 import Organizations from "@/pages/Organizations/Organizations.vue";
 import Account from "@/pages/Accounts/Account.vue";
+import Users from "@/pages/Users/Users.vue";
+import NotFound from "@/pages/NotFound.vue";
 const routes = [
     {
         path: "/",
@@ -20,9 +22,20 @@ const routes = [
         meta: { title: "Quản lý tổ chức" },
     },
     {
+        path: "/manage/Users",
+        component: Users,
+        meta: { title: "Quản lý người dùng" },
+    },
+    {
         path: "/me",
         component: Account,
         meta: { title: "Tài khoản" },
+    },
+    {
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: NotFound,
+        meta: { title: "Không tìm thấy trang" },
     },
 ];
 

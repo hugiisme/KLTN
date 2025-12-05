@@ -46,6 +46,11 @@ class User extends Authenticatable
         return $this->password_hash;
     }
 
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'user_orgs', 'user_id', 'org_id');
+    }
+
     // public function getAuthIdentifierName()
     // {
     //     return 'username';

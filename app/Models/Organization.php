@@ -51,4 +51,9 @@ class Organization extends Model
     {
         return $this->belongsTo(OrgLevel::class, 'org_level_id');
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_orgs', 'org_id', 'user_id');
+    }
 }
