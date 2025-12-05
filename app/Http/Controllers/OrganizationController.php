@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Organization;
 use App\Models\OrgType;
 use App\Models\OrgLevel;
+use Illuminate\Validation\Rule;
 
 class OrganizationController extends Controller
 {
@@ -62,6 +63,7 @@ class OrganizationController extends Controller
     {
         return [
             'id' => $org->id,
+            'name' => $org->name,
             'label' => $org->name,
             'type' => 'organization',
             'org_type' => $org->type,
@@ -87,7 +89,14 @@ class OrganizationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'          => 'required|string|unique:organizations,name',
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('organizations')->where(function ($query) use ($request) {
+                    return $query->where('parent_org_id', $request->parent_org_id);
+                }),
+            ],
+            'description'   => 'nullable|string',
             'parent_org_id' => 'nullable|exists:organizations,id',
             'org_type_id'   => 'required|exists:org_types,id',
             'org_level_id'  => 'required|exists:org_levels,id',
@@ -107,7 +116,16 @@ class OrganizationController extends Controller
         $org = Organization::findOrFail($id);
 
         $data = $request->validate([
-            'name'          => 'required|string|max:255|unique:organizations,name,' . $org->id,
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('organizations')
+                    ->ignore($org->id)
+                    ->where(function ($query) use ($request) {
+                        return $query->where('parent_org_id', $request->parent_org_id);
+                    }),
+            ],
+            'description'   => 'nullable|string',
             'parent_org_id' => 'nullable|exists:organizations,id',
             'org_type_id'   => 'required|exists:org_types,id',
             'org_level_id'  => 'required|exists:org_levels,id',
@@ -148,8 +166,6 @@ class OrganizationController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%");
-                // ->orWhere('email', 'like', "%{$search}%")
-                // ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 

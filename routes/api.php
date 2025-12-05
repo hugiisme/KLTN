@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\UserTypeController;
+use App\Http\Controllers\OrgRegistrationController;
 
 Route::post('/log-notification', function (Request $request) {
     $type = strtoupper($request->type);
@@ -53,3 +54,8 @@ Route::delete('/users/{id}', [UserController::class, 'destroy']);
 Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
 
 Route::get('/user-types', [UserTypeController::class, 'index']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me/org-status', [OrgRegistrationController::class, 'getMyStatus']);
+    Route::post('/join-requests', [OrgRegistrationController::class, 'sendRequest']);
+});

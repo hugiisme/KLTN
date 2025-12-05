@@ -5,6 +5,7 @@ import Organizations from "@/pages/Organizations/Organizations.vue";
 import Account from "@/pages/Accounts/Account.vue";
 import Users from "@/pages/Users/Users.vue";
 import NotFound from "@/pages/NotFound.vue";
+import OrgRegistration from "../pages/OrgRegistration/OrgRegistration.vue";
 const routes = [
     {
         path: "/",
@@ -30,6 +31,11 @@ const routes = [
         path: "/me",
         component: Account,
         meta: { title: "Tài khoản" },
+    },
+    {
+        path: "/organizations/directory",
+        component: OrgRegistration,
+        meta: { title: "Câu lạc bộ / Đội / Nhóm" },
     },
     {
         path: "/:pathMatch(.*)*",

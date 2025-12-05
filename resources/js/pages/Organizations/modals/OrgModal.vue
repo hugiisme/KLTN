@@ -106,6 +106,11 @@ const orgLevelOptions = computed(() => {
                     type: 'text',
                 },
                 {
+                    name: 'description',
+                    label: 'Mô tả',
+                    type: 'textarea',
+                },
+                {
                     name: 'parent_org_id',
                     label: 'Thuộc tổ chức',
                     type: 'select',

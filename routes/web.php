@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\OrgRegistrationController;
 
 Route::get('/login', function () {
     return view('login');

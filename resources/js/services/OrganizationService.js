@@ -34,4 +34,16 @@ export default {
         const res = await axios.get(`/api/manage/organizations/${id}`);
         return res.data;
     },
+
+    async getMyStatus() {
+        const res = await axios.get("/api/me/org-status");
+        return res.data;
+    },
+
+    async sendJoinRequest(orgId, remark) {
+        return axios.post("/api/join-requests", {
+            org_id: orgId,
+            remark: remark,
+        });
+    },
 };

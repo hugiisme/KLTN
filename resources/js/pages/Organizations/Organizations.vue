@@ -171,6 +171,7 @@ function handleUpperAction(event) {
                 :custom-rows="selectedNode?.children ?? []"
                 :columns="[
                     { key: 'label', label: 'Tên tổ chức' },
+                    { key: 'description', label: 'Mô tả' },
                     { key: 'org_type.name', label: 'Loại' },
                     { key: 'org_level.equivalent_name', label: 'Cấp' },
                     { key: 'actions', label: 'Hành động', type: 'actions' },

@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             OrgTypeSeeder::class,
             OrgLevelSeeder::class,
+            UserTypeSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

@@ -10,6 +10,7 @@ class Organization extends Model
 
     protected $fillable = [
         'name',
+        'description',
         'parent_org_id',
         'org_type_id',
         'org_level_id',
@@ -55,5 +56,10 @@ class Organization extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_orgs', 'org_id', 'user_id');
+    }
+
+    public function joinRequests()
+    {
+        return $this->hasMany(OrgJoinRequest::class);
     }
 }

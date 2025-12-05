@@ -50,11 +50,11 @@ export default [
     // ================== HOẠT ĐỘNG ==================
     {
         name: "Hoạt động",
-        url: "/activities",
+        url: "",
         children: [
             {
-                name: "Sự kiện sắp tới",
-                url: "/activities/upcoming",
+                name: "Tổng hợp hoạt động",
+                url: "/activities",
             },
             {
                 name: "Hoạt động của tôi",

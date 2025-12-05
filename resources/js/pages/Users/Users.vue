@@ -133,7 +133,7 @@ onMounted(async () => {
                     icon: 'fa-solid fa-user-plus',
                     event: 'create-user',
                     class: 'bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 shadow active:scale-95 text-sm font-medium',
-                    show: () => !!selectedNode,
+                    show: true,
                 },
                 {
                     label: 'Import người dùng',

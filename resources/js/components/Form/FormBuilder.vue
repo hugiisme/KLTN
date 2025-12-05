@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import Notification from "@/services/NotificationService.js";
 
 const props = defineProps({
     fields: { type: Array, required: true },
@@ -112,9 +113,16 @@ watch(
 );
 
 function sendForm() {
+    console.log("sendForm called", { ...formData.value });
     if (!validateForm()) {
+        console.log("Form not valid", { ...errors.value });
+        Notification.send(
+            "warning",
+            "Vui lòng kiểm tra các trường bắt buộc trước khi gửi."
+        );
         return;
     }
+    console.log("FormBuilder emit submit", { ...formData.value });
     emit("submit", { ...formData.value });
 }
 
@@ -269,7 +277,12 @@ const inputClass =
 
         <div class="flex flex-col gap-3 mt-4">
             <button
-                @click="sendForm"
+                @click="
+                    () => {
+                        console.log('Button clicked');
+                        sendForm();
+                    }
+                "
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
             >
                 <i class="fa-solid fa-floppy-disk"></i>

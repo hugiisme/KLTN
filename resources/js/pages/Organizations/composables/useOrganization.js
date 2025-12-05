@@ -89,6 +89,7 @@ export default function useOrganization(
 
             // Reload tree và RightPanel
             await loadTree();
+            await loadDropdowns();
             remapSelectedOrg();
             if (rightPanelRef?.value?.reload) rightPanelRef.value.reload();
         } catch (err) {
