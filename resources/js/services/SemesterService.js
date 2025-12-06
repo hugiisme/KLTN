@@ -2,11 +2,10 @@ import axios from "axios";
 
 export default {
     async getByYear(yearId) {
-        return (
-            await axios.get("/api/manage/semesters", {
-                params: { academic_year_id: yearId },
-            })
-        ).data;
+        const response = await axios.get("/api/manage/semesters", {
+            params: { academic_year_id: yearId },
+        });
+        return response.data.data ?? [];
     },
 
     async create(data) {

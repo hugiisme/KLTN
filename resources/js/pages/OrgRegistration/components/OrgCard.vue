@@ -3,7 +3,6 @@ import { computed } from "vue";
 
 const props = defineProps({
     org: { type: Object, required: true },
-    // userStatus: 'joined' | 'pending' | 'blocked_exclusive' | 'available'
     userStatus: { type: String, default: "available" },
 });
 

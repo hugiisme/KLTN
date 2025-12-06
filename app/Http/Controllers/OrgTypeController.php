@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\OrgType;
+use App\Traits\ApiResponse;
 
 class OrgTypeController extends Controller
 {
+    use ApiResponse;
+
     public function index()
     {
-        return response()->json(OrgType::all());
+        $types = OrgType::all();
+        return $this->successResponse($types, 'Danh sách loại tổ chức');
     }
 }

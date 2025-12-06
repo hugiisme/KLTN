@@ -4,33 +4,29 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Semester;
+use App\Traits\ApiResponse;
 
 class SemesterController extends Controller
 {
-    /**
-     * GET /api/manage/semesters
-     */
+    use ApiResponse;
+
     public function index(Request $request)
     {
         $query = Semester::query();
 
-        // FILTER: academic_year_id
         if ($request->filled('academic_year_id')) {
             $query->where('academic_year_id', $request->academic_year_id);
         }
 
-        // SEARCH: search on name (customize as needed)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         }
 
-        // CUSTOM FILTER: filter_field + filter_value
         if ($request->filled('filter_field') && $request->filled('filter_value')) {
             $query->where($request->filter_field, $request->filter_value);
         }
 
-        // SORTING
         if ($request->filled('sort_field')) {
             $query->orderBy(
                 $request->sort_field,
@@ -38,51 +34,45 @@ class SemesterController extends Controller
             );
         }
 
-        // PAGINATION
         $perPage = (int) ($request->per_page ?? 10);
-        $items = $query->paginate($perPage);
+        $items = $query->orderBy('start_date', 'desc')->paginate($perPage);
 
-        return response()->json($items);
+        return $this->paginatedResponse($items, 'Danh sách học kỳ');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'name' => 'required|string|max:255',
             'start_date' => 'required|date',
-            'end_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
             'academic_year_id' => 'required|integer|exists:academic_years,id',
         ]);
 
-        $semester = Semester::create($request->all());
+        $semester = Semester::create($data);
 
-        return response()->json($semester, 201);
+        return $this->successResponse($semester, 'Tạo học kỳ thành công', 201);
     }
 
     public function show(Semester $semester)
     {
-        return response()->json($semester);
+        return $this->successResponse($semester, 'Chi tiết học kỳ');
     }
 
     public function update(Request $request, $id)
     {
         $semester = Semester::findOrFail($id);
 
-        $request->validate([
-            'name'          => 'sometimes|required|string|max:255',
-            'start_date'    => 'sometimes|required|date',
-            'end_date'      => 'sometimes|required|date',
-            'academic_year_id' => 'sometimes|required|integer|exists:academic_years,id',
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'academic_year_id' => 'required|integer|exists:academic_years,id',
         ]);
 
-        $semester->update($request->only([
-            'name',
-            'start_date',
-            'end_date',
-            'academic_year_id'
-        ]));
+        $semester->update($data);
 
-        return response()->json($semester);
+        return $this->successResponse($semester, 'Cập nhật học kỳ thành công');
     }
 
     public function destroy($id)
@@ -90,6 +80,6 @@ class SemesterController extends Controller
         $semester = Semester::findOrFail($id);
         $semester->delete();
 
-        return response()->json(null, 204);
+        return $this->successMessage('Xóa học kỳ thành công');
     }
 }

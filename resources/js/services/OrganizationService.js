@@ -7,7 +7,13 @@ export default {
     },
 
     async getTree() {
-        return (await axios.get("/api/manage/organizations/tree")).data;
+        const response = await axios.get("/api/manage/organizations/tree");
+        return response.data.data ?? [];
+    },
+
+    async getById(id) {
+        const res = await axios.get(`/api/manage/organizations/${id}`);
+        return res.data.data ?? {};
     },
 
     async create(data) {
@@ -23,34 +29,31 @@ export default {
     },
 
     async getTypes() {
-        return (await axios.get("/api/manage/org-types")).data;
+        const response = await axios.get("/api/manage/org-types");
+        return response.data.data ?? [];
     },
 
     async getLevels() {
-        return (await axios.get("/api/manage/org-levels")).data;
-    },
-
-    async getById(id) {
-        const res = await axios.get(`/api/manage/organizations/${id}`);
-        return res.data;
+        const response = await axios.get("/api/manage/org-levels");
+        return response.data.data ?? [];
     },
 
     async getMyStatus() {
         const res = await axios.get("/api/me/org-status");
-        return res.data;
+        return res.data.data ?? {};
     },
 
     async sendJoinRequest(orgId, remark) {
-        return axios.post("/api/join-requests", {
+        return axios.post("/api/me/join-requests", {
             org_id: orgId,
             remark: remark,
         });
     },
+
     async getPendingRequests(orgId) {
-        return (
-            await axios.get(
-                `/api/manage/organizations/${orgId}/pending-requests`
-            )
-        ).data;
+        const response = await axios.get(
+            `/api/manage/organizations/${orgId}/pending-requests`
+        );
+        return response.data.data ?? [];
     },
 };

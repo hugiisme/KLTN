@@ -15,6 +15,13 @@ class Semester extends Model
         'end_date',
     ];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);

@@ -4,7 +4,6 @@ import { computed } from "vue";
 const props = defineProps({
     node: { type: Object, required: true },
     level: { type: Number, default: 0 },
-    // selected is an object like { id, type } passed from the top-level panel
     selected: { type: Object, default: null },
     isExpanded: { type: Boolean, default: false },
     isNodeExpanded: { type: Function, required: true }, // nhận từ TreeView
@@ -89,6 +88,6 @@ function onSelect(e) {
 .children {
     margin-left: 0;
     margin-top: 2px;
-    border-left: 1px dashed #d1d5db; /* gray-300 */
+    border-left: 1px dashed #d1d5db;
 }
 </style>

@@ -12,14 +12,6 @@ Route::get('/login', function () {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
-// Route::middleware('auth')->prefix('api')->group(function () {
-Route::prefix('api')->group(function () {
-
-    Route::get('/me', [AccountController::class, 'me']);
-    Route::put('/me', [AccountController::class, 'updateAccount']);
-    Route::put('/me/password', [AccountController::class, 'changePassword']);
-});
-
 Route::get('/{any}', function () {
     return view('app'); // Ứng dụng Vue.js
 })->where('any', '.*');

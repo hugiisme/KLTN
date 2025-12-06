@@ -7,18 +7,17 @@ const props = defineProps({
     modelValue: Boolean,
     mode: { type: String, default: "create" }, // create | edit
     initialData: { type: Object, default: () => ({}) },
-
     academicYears: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(["update:modelValue", "submit"]);
 
+const formData = ref({ ...props.initialData });
+
 const modalVisible = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
 });
-
-const formData = ref({ ...props.initialData });
 
 watch(
     () => props.initialData,

@@ -16,7 +16,23 @@ export default function useOrganization(
 ) {
     const selectedOrg = ref(null);
 
-    // Open modal: create
+    function remapSelectedOrg() {
+        if (!selectedNode.value) return;
+
+        const newNode = treeData.value
+            .flatMap((n) => [n, ...(n.children ?? [])])
+            .find((n) => n.id === selectedNode.value.id);
+
+        selectedNode.value = newNode || null;
+    }
+
+    async function refreshUI() {
+        await loadTree();
+        await loadDropdowns();
+        remapSelectedOrg();
+        if (rightPanelRef?.value?.reload) rightPanelRef.value.reload();
+    }
+
     async function openCreateOrgModal() {
         if (!parentOrgs.value.length) await loadDropdowns();
 
@@ -28,7 +44,6 @@ export default function useOrganization(
         isOrgModalOpen.value = true;
     }
 
-    // Open modal: edit
     async function openEditOrgModal(node) {
         if (!node) return;
 
@@ -54,18 +69,6 @@ export default function useOrganization(
         }
     }
 
-    // Remap selectedNode sau khi reload tree
-    function remapSelectedOrg() {
-        if (!selectedNode.value) return;
-
-        const newNode = treeData.value
-            .flatMap((n) => [n, ...(n.children ?? [])])
-            .find((n) => n.id === selectedNode.value.id);
-
-        selectedNode.value = newNode || null;
-    }
-
-    // Submit form
     async function handleOrgSubmit(formData) {
         if (!formData || typeof formData !== "object") return;
 
@@ -86,24 +89,17 @@ export default function useOrganization(
             }
 
             isOrgModalOpen.value = false;
-
-            // Reload tree và RightPanel
-            await loadTree();
-            await loadDropdowns();
-            remapSelectedOrg();
-            if (rightPanelRef?.value?.reload) rightPanelRef.value.reload();
+            await refreshUI();
         } catch (err) {
             console.error(err);
             Notification.send("error", "Lỗi khi lưu tổ chức");
         }
     }
 
-    // Select node
     function onSelectOrg(node) {
         selectedNode.value = node;
     }
 
-    // Delete node
     async function deleteOrg(row) {
         if (!row?.id) return;
         if (!confirm("Bạn có chắc muốn xoá tổ chức này?")) return;
@@ -112,17 +108,12 @@ export default function useOrganization(
             await OrganizationService.delete(row.id);
             Notification.send("success", "Đã xoá tổ chức");
 
-            // Reload tree và RightPanel
-            await loadTree();
-            remapSelectedOrg();
-            if (rightPanelRef?.value?.reload) rightPanelRef.value.reload();
+            await refreshUI();
 
-            // Expand parent node
             if (treePanelRef.value?.treeView && row.parent?.id) {
                 treePanelRef.value.treeView.expandNode(row.parent.id);
             }
 
-            // Đóng modal nếu đang mở đúng tổ chức bị xoá
             if (isOrgModalOpen.value && modalInitialData.value?.id === row.id) {
                 isOrgModalOpen.value = false;
             }

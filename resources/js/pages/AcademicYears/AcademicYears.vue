@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
+
 import LeftPanel from "@/components/Panels/LeftPanel.vue";
 import RightPanel from "@/components/panels/RightPanel.vue";
 import UpperPanel from "@/components/panels/UpperPanel.vue";
-
 import YearModal from "./modals/AcademicYearModal.vue";
 import SemesterModal from "./modals/SemesterModal.vue";
 
@@ -19,18 +19,6 @@ const selectedNode = ref(null);
 const treePanelRef = ref(null);
 const semesterPanelRef = ref(null);
 
-// Load tree
-async function loadTree() {
-    try {
-        const res = await AcademicYearService.getTree();
-        treeData.value = res;
-        updateTreeToRender();
-    } catch (err) {
-        Notification.send("error", "Lỗi khi load tree năm học - học kỳ");
-    }
-}
-
-// Composables
 const {
     treeToRender,
     academicYears,
@@ -67,6 +55,17 @@ const {
     treePanelRef,
     semesterPanelRef
 );
+
+async function loadTree() {
+    try {
+        const res = await AcademicYearService.getAll();
+        treeData.value = res;
+        updateTreeToRender();
+    } catch (err) {
+        console.error(err);
+        Notification.send("error", "Lỗi khi load tree năm học - học kỳ");
+    }
+}
 
 function handleUpperAction(event) {
     if (event === "create-year") openCreateYearModal();
@@ -108,7 +107,7 @@ onMounted(() => loadTree());
             @action="handleUpperAction"
         />
 
-        <div class="flex flex-1 min-h-0 gap-4">
+        <div class="flex flex-1 min-h-0 gap-4 overflow-hidden">
             <LeftPanel
                 ref="treePanelRef"
                 treeLabel="Danh sách năm học - học kỳ"
@@ -123,7 +122,7 @@ onMounted(() => loadTree());
                 @search="onTreeSearch"
                 @sort="onTreeSort"
                 @filter="onTreeFilter"
-            ></LeftPanel>
+            />
 
             <div class="flex-1 flex flex-col gap-4 h-full">
                 <RightPanel
@@ -170,12 +169,12 @@ onMounted(() => loadTree());
         :initialData="modalInitialData"
         @submit="handleYearSubmit"
         @delete="deleteYear"
-    ></YearModal>
+    />
     <SemesterModal
         v-model="isSemesterModalOpen"
         :mode="semesterModalMode"
         :initialData="semesterModalInitialData"
         :academicYears="academicYears"
         @submit="handleSemesterSubmit"
-    ></SemesterModal>
+    />
 </template>

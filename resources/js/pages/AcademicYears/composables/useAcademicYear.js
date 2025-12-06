@@ -13,15 +13,27 @@ export default function useAcademicYear(
     const modalMode = ref("create");
     const modalInitialData = ref(null);
 
-    const formatDate = (date) => date?.toString().slice(0, 10) || "";
+    function formatDate(date) {
+        return date?.toString().slice(0, 10) || "";
+    }
 
-    const openCreateYearModal = () => {
+    function remapSelectedYear() {
+        if (!selectedYear.value) return;
+
+        const newNode = treeData.value
+            .flatMap((year) => [year, ...(year.semesters ?? [])])
+            .find((n) => n.id === selectedYear.value.id);
+
+        selectedYear.value = newNode || null;
+    }
+
+    function openCreateYearModal() {
         modalMode.value = "create";
         modalInitialData.value = null;
         isYearModalOpen.value = true;
-    };
+    }
 
-    const openEditYearModal = () => {
+    function openEditYearModal() {
         if (!selectedYear.value) return;
         modalMode.value = "edit";
         modalInitialData.value = {
@@ -30,18 +42,15 @@ export default function useAcademicYear(
             end_date: formatDate(selectedYear.value.end_date),
         };
         isYearModalOpen.value = true;
-    };
+    }
 
-    const handleYearSubmit = async (data) => {
+    async function handleYearSubmit(data) {
         try {
             if (modalMode.value === "create") {
-                await AcademicYearService.createYear(data);
+                await AcademicYearService.create(data);
                 Notification.send("success", "Tạo năm học thành công");
             } else {
-                await AcademicYearService.updateYear(
-                    selectedYear.value.id,
-                    data
-                );
+                await AcademicYearService.update(selectedYear.value.id, data);
                 Notification.send("success", "Cập nhật năm học thành công");
             }
             isYearModalOpen.value = false;
@@ -52,22 +61,22 @@ export default function useAcademicYear(
             console.error(err);
             Notification.send("error", "Lỗi khi lưu năm học");
         }
-    };
+    }
 
-    const onSelectYear = (node) => {
+    function onSelectYear(node) {
         selectedNode.value = { id: node.id, type: node.type };
         if (node.type === "academic_year") selectedYear.value = node;
         else if (node.type === "semester")
             selectedYear.value = node.academic_year;
-    };
+    }
 
-    const deleteYear = async () => {
+    async function deleteYear() {
         if (!selectedYear.value?.id) return;
 
         if (!confirm("Bạn có chắc muốn xoá năm học này?")) return;
 
         try {
-            await AcademicYearService.deleteYear(selectedYear.value.id);
+            await AcademicYearService.delete(selectedYear.value.id);
             Notification.send("success", "Đã xoá năm học");
 
             isYearModalOpen.value = false;
@@ -78,16 +87,6 @@ export default function useAcademicYear(
             console.error(err);
             Notification.send("error", "Lỗi khi xoá năm học");
         }
-    };
-
-    function remapSelectedYear() {
-        if (!selectedYear.value) return;
-
-        const newNode = treeData.value
-            .flatMap((year) => [year, ...(year.semesters ?? [])])
-            .find((n) => n.id === selectedYear.value.id);
-
-        selectedYear.value = newNode || null;
     }
 
     return {

@@ -19,9 +19,6 @@ class OrgType extends Model
         'is_exclusive' => 'boolean',
     ];
 
-    /**
-     * Danh sách tổ chức thuộc loại này
-     */
     public function organizations()
     {
         return $this->hasMany(Organization::class, 'org_type_id');

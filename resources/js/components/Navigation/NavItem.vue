@@ -60,19 +60,17 @@ const isActive = computed(() => {
 </template>
 
 <style scoped>
-/* Hiện submenu khi hover nhóm */
 .nav-group:hover > .submenu {
     display: block;
 }
 
-/* BUFFER để giữ hover khi di chuột xuống submenu */
 .hover-buffer {
     position: absolute;
-    bottom: -10px; /* tạo vùng mở rộng dưới item */
+    bottom: -10px;
     left: 0;
     width: 100%;
-    height: 12px; /* đủ để di chuột không bị mất hover */
-    background: transparent; /* hoàn toàn vô hình */
-    pointer-events: auto; /* cho phép hover hoạt động */
+    height: 12px;
+    background: transparent;
+    pointer-events: auto;
 }
 </style>

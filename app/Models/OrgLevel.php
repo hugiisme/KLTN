@@ -19,9 +19,6 @@ class OrgLevel extends Model
         'level_index' => 'integer',
     ];
 
-    /**
-     * Danh sách tổ chức thuộc cấp này
-     */
     public function organizations()
     {
         return $this->hasMany(Organization::class, 'org_level_id');

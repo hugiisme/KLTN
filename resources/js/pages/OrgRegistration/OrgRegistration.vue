@@ -1,18 +1,25 @@
 <script setup>
+// =============================================================================
+// COMPONENTS
+// =============================================================================
 import { ref, onMounted, computed } from "vue";
-
 import LeftPanel from "@/components/Panels/LeftPanel.vue";
 import UpperPanel from "@/components/Panels/UpperPanel.vue";
 import OrgCard from "./components/OrgCard.vue";
 import JoinRequestModal from "./modals/JoinRequestModal.vue";
 
+// =============================================================================
+// SERVICES & COMPOSABLES
+// =============================================================================
 import useOrgTree from "@/pages/Organizations/composables/useOrgTree";
 import OrganizationService from "@/services/OrganizationService.js";
 import Notification from "@/services/NotificationService.js";
 
+// =============================================================================
+// STATE
+// =============================================================================
 const treeData = ref([]);
 const selectedNode = ref(null);
-
 const isJoinModalOpen = ref(false);
 const selectedOrgToJoin = ref(null);
 
@@ -22,53 +29,29 @@ const userMembership = ref({
     exclusive_map: {},
 });
 
-function normalizeNode(node, parent = null) {
-    if (!node) return null;
-    return {
-        ...node,
-        label: node.label ?? node.name ?? "",
-        parent: parent ? { id: parent.id, label: parent.name } : null,
-        children: Array.isArray(node.children)
-            ? node.children.map((c) => normalizeNode(c, node)).filter(Boolean)
-            : [],
-    };
-}
-
+// =============================================================================
+// COMPOSABLE
+// =============================================================================
 const {
     treeToRender,
     updateTreeToRender,
     onTreeSearch,
     onTreeFilter,
     onTreeSort,
+    normalizeNode,
 } = useOrgTree(treeData);
 
-async function loadData() {
-    try {
-        const [treeRes, statusRes] = await Promise.all([
-            OrganizationService.getTree(),
-            OrganizationService.getMyStatus().catch(() => ({
-                joined_org_ids: [],
-                pending_org_ids: [],
-                exclusive_map: {},
-            })),
-        ]);
-
-        treeData.value = treeRes.map((node) => normalizeNode(node));
-        updateTreeToRender();
-
-        userMembership.value = statusRes;
-    } catch (err) {
-        console.error(err);
-        Notification.send("error", "Lỗi tải dữ liệu hệ thống");
-    }
-}
-
+// =============================================================================
+// COMPUTED
+// =============================================================================
 const displayOrgs = computed(() => {
     if (!selectedNode.value) return [];
-
     return selectedNode.value.children || [];
 });
 
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
 function getUserStatusForOrg(org) {
     if (!userMembership.value || !org) return "available";
 
@@ -90,6 +73,26 @@ function getUserStatusForOrg(org) {
     return "available";
 }
 
+async function loadData() {
+    try {
+        const [treeRes, statusRes] = await Promise.all([
+            OrganizationService.getTree(),
+            OrganizationService.getMyStatus().catch(() => ({
+                joined_org_ids: [],
+                pending_org_ids: [],
+                exclusive_map: {},
+            })),
+        ]);
+
+        treeData.value = treeRes.map((node) => normalizeNode(node));
+        updateTreeToRender();
+        userMembership.value = statusRes;
+    } catch (err) {
+        console.error(err);
+        Notification.send("error", "Lỗi tải dữ liệu hệ thống");
+    }
+}
+
 function openJoinModal(org) {
     selectedOrgToJoin.value = org;
     isJoinModalOpen.value = true;
@@ -97,11 +100,8 @@ function openJoinModal(org) {
 
 async function handleConfirmJoin({ org_id, remark }) {
     try {
-        console.log("CONFIRM RECEIVED:", { org_id, remark });
         await OrganizationService.sendJoinRequest(org_id, remark ?? null);
-
         Notification.send("success", "Đã gửi yêu cầu tham gia thành công!");
-
         userMembership.value.pending_org_ids.push(org_id);
         isJoinModalOpen.value = false;
         selectedOrgToJoin.value = null;

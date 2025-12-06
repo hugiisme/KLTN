@@ -16,7 +16,6 @@ const sortState = ref({
 function formatDate(value) {
     if (!value) return "";
     const date = new Date(value);
-    // Kiểm tra nếu date không hợp lệ thì trả về giá trị gốc
     if (isNaN(date.getTime())) return value;
 
     // Format theo kiểu Việt Nam: dd/mm/yyyy
@@ -24,8 +23,6 @@ function formatDate(value) {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-        // Bỏ comment dòng dưới nếu muốn hiện cả giờ phút
-        // hour: "2-digit", minute: "2-digit"
     }).format(date);
 }
 // ---------------------------------------

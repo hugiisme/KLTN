@@ -1,7 +1,8 @@
 <script setup>
+import { ref, computed, watch } from "vue";
 import Modal from "@/components/Modal/Modal.vue";
 import FormBuilder from "@/components/Form/FormBuilder.vue";
-import { ref, computed, watch } from "vue";
+
 import Notification from "@/services/NotificationService.js";
 
 const props = defineProps({
@@ -11,37 +12,32 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "confirm"]);
 
-const modalVisible = computed({
-    get: () => props.modelValue,
-    set: (val) => emit("update:modelValue", val),
-});
-
 const formData = ref({
     remark: "",
 });
 
-watch(
-    () => props.org,
-    () => {
-        formData.value.remark = "";
-    }
-);
+const modalVisible = computed({
+    get: () => props.modelValue,
+    set: (val) => emit("update:modelValue", val),
+});
 
 const modalTitle = computed(() => {
     if (!props.org) return "Đăng ký tham gia";
     return `Đăng ký tham gia: ${props.org.name || props.org.label || "..."}`;
 });
 
+function validateAndPrepareData(data) {
+    const remarkValue = data?.remark ?? formData.value.remark ?? "";
+    return remarkValue?.trim() === "" ? null : remarkValue.trim();
+}
+
 function handleSubmit(data) {
-    // Debug log to verify submit is triggered
-    console.log("JoinRequestModal submit", data);
     if (!props.org || !props.org.id) {
         Notification.send("error", "Lỗi: Không xác định được tổ chức!");
         return;
     }
 
-    const remarkValue = data?.remark ?? formData.value.remark ?? "";
-    const safeRemark = remarkValue?.trim() === "" ? null : remarkValue.trim();
+    const safeRemark = validateAndPrepareData(data);
 
     Notification.send("info", "Đang gửi yêu cầu...");
     emit("confirm", {
@@ -51,6 +47,13 @@ function handleSubmit(data) {
 
     modalVisible.value = false;
 }
+
+watch(
+    () => props.org,
+    () => {
+        formData.value.remark = "";
+    }
+);
 </script>
 
 <template>

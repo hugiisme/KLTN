@@ -9,24 +9,21 @@ import PendingRequestsModal from "./modals/PendingRequestsModal.vue";
 
 import useOrgTree from "./composables/useOrgTree";
 import useOrganization from "./composables/useOrganization";
-import Notification from "@/services/NotificationService.js";
 
+import Notification from "@/services/NotificationService.js";
 import OrganizationService from "@/services/OrganizationService.js";
 import OrgTypeService from "@/services/OrgTypeService.js";
 import OrgLevelService from "@/services/OrgLevelService.js";
 
-// Tree và selection
 const treeData = ref([]);
 const selectedNode = ref(null);
 const treePanelRef = ref(null);
 const rightPanelRef = ref(null);
 
-// Dropdown data
 const orgTypes = ref([]);
 const orgLevels = ref([]);
 const parentOrgs = ref([]);
 
-// Modal control
 const isOrgModalOpen = ref(false);
 const modalMode = ref("create");
 const modalInitialData = ref(null);
@@ -35,52 +32,6 @@ const isPendingModalOpen = ref(false);
 const pendingRequests = ref([]);
 const pendingOrg = ref(null);
 
-// Load dropdown data
-async function loadDropdowns() {
-    try {
-        const [types, levels, parents] = await Promise.all([
-            OrgTypeService.getAll(),
-            OrgLevelService.getAll(),
-            OrganizationService.getTree(),
-        ]);
-
-        orgTypes.value = types;
-        orgLevels.value = levels;
-        parentOrgs.value = parents;
-    } catch (err) {
-        console.error(err);
-        Notification.send("error", "Lỗi khi load dữ liệu tổ chức");
-    }
-}
-
-// Chuẩn hóa node
-function normalizeNode(node, parent = null) {
-    if (!node) return null;
-    return {
-        ...node,
-        label: node.label ?? node.name ?? "",
-        parent: parent
-            ? { id: parent.id, label: parent.name ?? parent.label ?? "" }
-            : null,
-        children: Array.isArray(node.children)
-            ? node.children.map((c) => normalizeNode(c, node)).filter(Boolean)
-            : [],
-    };
-}
-
-// Load tree
-async function loadTree() {
-    try {
-        const res = await OrganizationService.getTree();
-        treeData.value = res.map(normalizeNode);
-        updateTreeToRender();
-    } catch (err) {
-        console.error(err);
-        Notification.send("error", "Lỗi khi load tree tổ chức");
-    }
-}
-
-// Composables
 const {
     treeToRender,
     updateTreeToRender,
@@ -108,12 +59,48 @@ const {
     rightPanelRef
 );
 
-onMounted(async () => {
-    await loadDropdowns();
-    await loadTree();
-});
+function normalizeNode(node, parent = null) {
+    if (!node) return null;
+    return {
+        ...node,
+        label: node.label ?? node.name ?? "",
+        parent: parent
+            ? { id: parent.id, label: parent.name ?? parent.label ?? "" }
+            : null,
+        children: Array.isArray(node.children)
+            ? node.children.map((c) => normalizeNode(c, node)).filter(Boolean)
+            : [],
+    };
+}
 
-// Handle action từ UpperPanel
+async function loadDropdowns() {
+    try {
+        const [types, levels, parents] = await Promise.all([
+            OrgTypeService.getAll(),
+            OrgLevelService.getAll(),
+            OrganizationService.getTree(),
+        ]);
+
+        orgTypes.value = types;
+        orgLevels.value = levels;
+        parentOrgs.value = parents;
+    } catch (err) {
+        console.error(err);
+        Notification.send("error", "Lỗi khi load dữ liệu tổ chức");
+    }
+}
+
+async function loadTree() {
+    try {
+        const res = await OrganizationService.getTree();
+        treeData.value = res.map(normalizeNode);
+        updateTreeToRender();
+    } catch (err) {
+        console.error(err);
+        Notification.send("error", "Lỗi khi load tree tổ chức");
+    }
+}
+
 function handleUpperAction(event) {
     if (event === "create-org") openCreateOrgModal();
     if (event === "edit-org") openEditOrgModal(selectedNode.value);
@@ -122,16 +109,19 @@ function handleUpperAction(event) {
 async function openPendingModal(org) {
     try {
         pendingOrg.value = org;
-
         const res = await OrganizationService.getPendingRequests(org.id);
         pendingRequests.value = res.data ?? [];
-
         isPendingModalOpen.value = true;
     } catch (err) {
         console.error(err);
         Notification.send("error", "Không tải được danh sách chờ duyệt");
     }
 }
+
+onMounted(async () => {
+    await loadDropdowns();
+    await loadTree();
+});
 </script>
 
 <template>
@@ -158,7 +148,7 @@ async function openPendingModal(org) {
             @action="handleUpperAction"
         />
 
-        <div class="flex h-full gap-4">
+        <div class="flex h-full gap-4 overflow-hidden">
             <LeftPanel
                 ref="treePanelRef"
                 treeLabel="Danh sách tổ chức"

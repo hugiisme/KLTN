@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watch } from "vue";
 
-// Props
 const props = defineProps({
     fields: {
         type: Array,
@@ -13,7 +12,6 @@ const props = defineProps({
     },
 });
 
-// Emits
 const emit = defineEmits(["search", "sort", "filter"]);
 
 // State
@@ -22,7 +20,6 @@ const selectedSortField = ref(props.fields[0]?.name ?? "label");
 const sortDirection = ref("asc");
 const selectedType = ref("all");
 
-// Debounce search
 let searchTimer = null;
 watch(searchText, (newVal) => {
     clearTimeout(searchTimer);
@@ -31,7 +28,6 @@ watch(searchText, (newVal) => {
     }, 250);
 });
 
-// Watch sort
 watch(
     [selectedSortField, sortDirection],
     ([field, dir], [oldField, oldDir]) => {

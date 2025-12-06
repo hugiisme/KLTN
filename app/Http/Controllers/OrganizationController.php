@@ -4,31 +4,27 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Organization;
-use App\Models\OrgType;
-use App\Models\OrgLevel;
+use App\Models\OrgJoinRequest;
 use Illuminate\Validation\Rule;
+use App\Traits\ApiResponse;
 
 class OrganizationController extends Controller
 {
-    /**
-     * GET /api/manage/organizations
-     */
+    use ApiResponse;
+
     public function index(Request $request)
     {
         $query = Organization::with('type', 'level', 'parent');
 
-        // SEARCH
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         }
 
-        // FILTER: filter_field + filter_value
         if ($request->filled('filter_field') && $request->filled('filter_value')) {
             $query->where($request->filter_field, $request->filter_value);
         }
 
-        // SORTING
         if ($request->filled('sort_field')) {
             $query->orderBy(
                 $request->sort_field,
@@ -36,16 +32,12 @@ class OrganizationController extends Controller
             );
         }
 
-        // PAGINATION
         $perPage = (int) ($request->per_page ?? 10);
         $items = $query->paginate($perPage);
 
-        return response()->json($items);
+        return $this->paginatedResponse($items, 'Danh sách tổ chức');
     }
 
-    /**
-     * TREE
-     */
     public function tree()
     {
         $organizations = Organization::with('children', 'type', 'level')
@@ -56,7 +48,7 @@ class OrganizationController extends Controller
             return $this->formatNode($org);
         });
 
-        return response()->json($tree);
+        return $this->successResponse($tree, 'Cây tổ chức');
     }
 
     protected function formatNode($org)
@@ -65,6 +57,7 @@ class OrganizationController extends Controller
             'id' => $org->id,
             'name' => $org->name,
             'label' => $org->name,
+            'description' => $org->description,
             'type' => 'organization',
             'org_type' => $org->type,
             'org_level' => $org->level,
@@ -77,13 +70,8 @@ class OrganizationController extends Controller
 
     public function show($id)
     {
-        $org = Organization::with('parent', 'type', 'level', 'children')->find($id);
-
-        if (!$org) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
-        return response()->json($org);
+        $org = Organization::with('parent', 'type', 'level', 'children')->findOrFail($id);
+        return $this->successResponse($org, 'Chi tiết tổ chức');
     }
 
     public function store(Request $request)
@@ -104,11 +92,7 @@ class OrganizationController extends Controller
 
         $org = Organization::create($data);
 
-        return response()->json([
-            'message' => 'Tạo tổ chức mới thành công',
-            'type' => 'success',
-            'data' => $org
-        ], 201);
+        return $this->successResponse($org, 'Tạo tổ chức thành công', 201);
     }
 
     public function update(Request $request, $id)
@@ -133,7 +117,7 @@ class OrganizationController extends Controller
 
         $org->update($data);
 
-        return response()->json($org);
+        return $this->successResponse($org, 'Cập nhật tổ chức thành công');
     }
 
     public function destroy($id)
@@ -141,38 +125,62 @@ class OrganizationController extends Controller
         $org = Organization::findOrFail($id);
         $org->delete();
 
-        return response()->json([
-            'message' => 'Xóa tổ chức thành công',
-            'type' => 'success',
-        ]);
+        return $this->successMessage('Xóa tổ chức thành công');
     }
 
-    public function getTypes()
-    {
-        return response()->json(OrgType::all());
-    }
-
-    public function getLevels()
-    {
-        return response()->json(OrgLevel::all());
-    }
     public function getUsers(Request $request, $id)
     {
         $org = Organization::findOrFail($id);
 
-        // SEARCH
         $query = $org->users()->with('type');
+
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            });
+            $query->where('username', 'like', "%{$search}%");
         }
 
-        // PAGINATION
+        if ($request->filled('filter_field') && $request->filled('filter_value')) {
+            $query->where($request->filter_field, $request->filter_value);
+        }
+
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
         $perPage = (int) ($request->per_page ?? 10);
         $users = $query->paginate($perPage);
 
-        return response()->json($users);
+        return $this->paginatedResponse($users, 'Danh sách người dùng trong tổ chức');
+    }
+
+    public function getPendingRequests(Request $request, $id)
+    {
+        $org = Organization::findOrFail($id);
+
+        $query = OrgJoinRequest::where('org_id', $id)
+            ->where('status', 'pending')
+            ->with('user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('username', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
+        $perPage = (int) ($request->per_page ?? 10);
+        $requests = $query->paginate($perPage);
+
+        return $this->paginatedResponse($requests, 'Danh sách yêu cầu chờ duyệt');
     }
 }

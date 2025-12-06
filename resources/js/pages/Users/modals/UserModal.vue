@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import Modal from "@/components/Modal/Modal.vue";
 import FormBuilder from "@/components/Form/FormBuilder.vue";
+
 import UserService from "@/services/UserService.js";
 import OrganizationService from "@/services/OrganizationService.js";
 import Notification from "@/services/NotificationService.js";
@@ -21,46 +22,29 @@ const modalVisible = computed({
 });
 
 const formData = ref({});
-
-// LOAD OPTIONS
 const userTypes = ref([]);
 const organizations = ref([]);
 
-async function handleSubmit(data) {
-    try {
-        // Filter out empty password for edit mode
-        const submitData = { ...data };
-        if (props.mode === "edit" && !submitData.password) {
-            delete submitData.password;
+function flattenOrgTree(nodes) {
+    const result = [];
+    function traverse(node) {
+        result.push({
+            id: node.id,
+            name: node.name ?? node.label ?? "",
+        });
+        if (node.children && Array.isArray(node.children)) {
+            node.children.forEach(traverse);
         }
-
-        if (props.mode === "create") {
-            await UserService.create(submitData);
-            Notification.send("success", "Đã thêm người dùng mới thành công");
-        } else {
-            await UserService.update(submitData.id, submitData);
-            Notification.send("success", "Đã cập nhật người dùng thành công");
-        }
-        modalVisible.value = false;
-    } catch (error) {
-        console.error(error);
-        const message =
-            error.response?.data?.message ||
-            "Lỗi khi lưu người dùng. Vui lòng kiểm tra lại thông tin";
-        Notification.send("error", message);
     }
-}
-
-function handleDelete() {
-    if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-        emit("delete", formData.value.id);
-    }
+    nodes.forEach(traverse);
+    return result;
 }
 
 async function loadOptions() {
     try {
-        userTypes.value = await UserService.getUserTypes();
-        organizations.value = await OrganizationService.getAll();
+        userTypes.value = await UserService.getTypes();
+        const treeOrgs = await OrganizationService.getTree();
+        organizations.value = flattenOrgTree(treeOrgs);
     } catch (e) {
         Notification.send(
             "error",
@@ -70,16 +54,31 @@ async function loadOptions() {
     }
 }
 
+function handleSubmit(data) {
+    const submitData = { ...data };
+    if (props.mode === "edit" && !submitData.password) {
+        delete submitData.password;
+    }
+    emit("submit", submitData);
+    modalVisible.value = false;
+}
+
+function handleDelete() {
+    if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
+        emit("delete", formData.value.id);
+    }
+}
+
 watch(
-    () => props.initialData,
-    (newVal) => {
+    () => [props.initialData, props.orgId],
+    ([newVal, orgId]) => {
         formData.value = {
             id: newVal?.id ?? null,
             username: newVal?.username ?? "",
             password: "",
             user_type_id: newVal?.user_type_id ?? "",
             status: newVal?.status ?? "active",
-            org_id: props.orgId ?? newVal?.org_id ?? "",
+            org_id: orgId ?? newVal?.org_id ?? "",
         };
     },
     { immediate: true }
@@ -97,6 +96,10 @@ onMounted(loadOptions);
         <FormBuilder
             :initialData="formData"
             :fields="[
+                {
+                    name: 'id',
+                    type: 'hidden',
+                },
                 {
                     name: 'username',
                     label: 'Tên đăng nhập',

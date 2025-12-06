@@ -21,33 +21,21 @@ class Organization extends Model
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * Tổ chức cha (self relation)
-     */
     public function parent()
     {
         return $this->belongsTo(Organization::class, 'parent_org_id');
     }
 
-    /**
-     * Danh sách tổ chức con
-     */
     public function children()
     {
         return $this->hasMany(Organization::class, 'parent_org_id');
     }
 
-    /**
-     * Quan hệ loại tổ chức
-     */
     public function type()
     {
         return $this->belongsTo(OrgType::class, 'org_type_id');
     }
 
-    /**
-     * Quan hệ cấp tổ chức
-     */
     public function level()
     {
         return $this->belongsTo(OrgLevel::class, 'org_level_id');
@@ -60,6 +48,6 @@ class Organization extends Model
 
     public function joinRequests()
     {
-        return $this->hasMany(OrgJoinRequest::class);
+        return $this->hasMany(OrgJoinRequest::class, 'org_id');
     }
 }

@@ -6,14 +6,12 @@ const props = defineProps({
     title: String,
     width: {
         type: String,
-        default: "500px", // Tăng width mặc định lên xíu cho thoáng
+        default: "500px",
     },
 });
 
 const emit = defineEmits(["update:modelValue"]);
 
-// Dùng trực tiếp props để điều khiển v-if bên ngoài hoặc giữ logic cũ
-// Tuy nhiên để transition hoạt động tốt, ta nên dùng <Transition> của Vue
 function close() {
     emit("update:modelValue", false);
 }
@@ -56,7 +54,6 @@ function close() {
 </template>
 
 <style scoped>
-/* Vue Transition Styles */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
     transition: opacity 0.2s ease;
@@ -77,7 +74,6 @@ function close() {
     transform: scale(0.95);
 }
 
-/* Custom Scrollbar cho modal */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }

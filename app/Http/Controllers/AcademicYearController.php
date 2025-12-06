@@ -4,28 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AcademicYear;
+use App\Traits\ApiResponse;
 
 class AcademicYearController extends Controller
 {
-    /**
-     * GET /api/manage/academic-years
-     */
+    use ApiResponse;
+
+
     public function index(Request $request)
     {
         $query = AcademicYear::query();
 
-        // SEARCH
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%");
         }
 
-        // CUSTOM FILTER
         if ($request->filled('filter_field') && $request->filled('filter_value')) {
             $query->where($request->filter_field, $request->filter_value);
         }
 
-        // SORTING
         if ($request->filled('sort_field')) {
             $query->orderBy(
                 $request->sort_field,
@@ -33,19 +31,15 @@ class AcademicYearController extends Controller
             );
         }
 
-        // PAGINATION
         $perPage = (int) ($request->per_page ?? 10);
-        $items = $query->paginate($perPage);
+        $items = $query->orderBy('start_date', 'desc')->paginate($perPage);
 
-        return response()->json($items);
+        return $this->paginatedResponse($items, 'Danh sách năm học');
     }
 
-    /**
-     * Tree API
-     */
     public function tree()
     {
-        $years = AcademicYear::with('semesters')->orderBy('start_date')->get();
+        $years = AcademicYear::with('semesters')->orderBy('start_date', 'desc')->get();
 
         $tree = $years->map(function ($year) {
             return [
@@ -68,39 +62,35 @@ class AcademicYearController extends Controller
             ];
         });
 
-        return response()->json($tree);
+        return $this->successResponse($tree, 'Cây năm học - học kỳ');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|unique:academic_years,name',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
         $academicYear = AcademicYear::create($data);
 
-        return response()->json([
-            'message' => 'Tạo năm học mới thành công',
-            'type' => "success",
-            'data' => $academicYear
-        ], 201);
+        return $this->successResponse($academicYear, 'Tạo năm học thành công', 201);
     }
 
     public function update(Request $request, $id)
     {
         $year = AcademicYear::findOrFail($id);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $data = $request->validate([
+            'name' => 'required|string|unique:academic_years,name,' . $id,
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $year->update($request->only(['name', 'start_date', 'end_date']));
+        $year->update($data);
 
-        return response()->json($year);
+        return $this->successResponse($year, 'Cập nhật năm học thành công');
     }
 
     public function destroy($id)
@@ -108,9 +98,6 @@ class AcademicYearController extends Controller
         $year = AcademicYear::findOrFail($id);
         $year->delete();
 
-        return response()->json([
-            'message' => 'Xóa năm học thành công',
-            'type' => "success",
-        ]);
+        return $this->successMessage('Xóa năm học thành công');
     }
 }

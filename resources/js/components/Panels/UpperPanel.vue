@@ -26,7 +26,6 @@ const emit = defineEmits(["action"]);
     <div
         class="flex justify-between items-center bg-white border border-gray-300 rounded-xl shadow-sm p-4"
     >
-        <!-- Left -->
         <div class="flex items-center gap-3">
             <div
                 class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"
@@ -37,7 +36,6 @@ const emit = defineEmits(["action"]);
             <h2 class="font-bold text-lg text-gray-800">{{ title }}</h2>
         </div>
 
-        <!-- Right: render auto buttons -->
         <div class="flex gap-3">
             <template v-for="(btn, i) in buttons" :key="i">
                 <button

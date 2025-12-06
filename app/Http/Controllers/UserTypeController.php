@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\UserType;
+use App\Traits\ApiResponse;
 
 class UserTypeController extends Controller
 {
+    use ApiResponse;
     public function index()
     {
-        $userTypes = UserType::all();
-        return response()->json($userTypes);
+        $types = UserType::all();
+        return $this->successResponse($types, 'Danh sách loại người dùng');
     }
 }

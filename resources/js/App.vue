@@ -5,7 +5,7 @@ import NavBar from "@/components/Navigation/NavBar.vue";
 
 <template>
     <NavBar />
-    <div class="pt-16 h-full">
+    <div class="pt-16 h-full overflow-hidden">
         <router-view />
     </div>
     <NotificationList />

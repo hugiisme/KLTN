@@ -3,28 +3,42 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Organization;
 use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
 
 class UserController extends Controller
 {
-    // Lấy danh sách user thuộc 1 organization
-    public function getByOrg($orgId)
-    {
-        $org = Organization::findOrFail($orgId);
+    use ApiResponse;
 
-        return response()->json(
-            $org->users()
-                ->select('users.id', 'users.username', 'users.user_type_id', 'users.status')
-                ->with('type')
-                ->get()
-        );
+    public function index(Request $request)
+    {
+        $query = User::with('type');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('username', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('filter_field') && $request->filled('filter_value')) {
+            $query->where($request->filter_field, $request->filter_value);
+        }
+
+        if ($request->filled('sort_field')) {
+            $query->orderBy(
+                $request->sort_field,
+                $request->sort_direction ?? 'asc'
+            );
+        }
+
+        $perPage = (int) ($request->per_page ?? 10);
+        $items = $query->paginate($perPage);
+
+        return $this->paginatedResponse($items, 'Danh sách người dùng');
     }
 
-    // Tạo user + gán vào organization
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'username' => 'required|string|unique:users,username',
             'password' => 'required|min:6',
             'user_type_id' => 'required|exists:user_types,id',
@@ -33,54 +47,59 @@ class UserController extends Controller
         ]);
 
         $user = User::create([
-            'username' => $request->username,
-            'password_hash' => bcrypt($request->password),
-            'user_type_id' => $request->user_type_id,
-            'status' => $request->status ?? 'active',
+            'username' => $data['username'],
+            'password_hash' => bcrypt($data['password']),
+            'user_type_id' => $data['user_type_id'],
+            'status' => $data['status'] ?? 'active',
         ]);
 
-        $user->organizations()->attach($request->org_id);
+        $user->organizations()->attach($data['org_id']);
+        $user->load('type', 'organizations');
 
-        return response()->json($user, 201);
+        return $this->successResponse($user, 'Tạo người dùng thành công', 201);
     }
 
-    // Cập nhật user
+    public function show($id)
+    {
+        $user = User::with('type', 'organizations')->findOrFail($id);
+        return $this->successResponse($user, 'Chi tiết người dùng');
+    }
+
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $user = User::findOrFail($id);
+
+        $data = $request->validate([
             'username' => 'required|string|unique:users,username,' . $id,
             'user_type_id' => 'nullable|exists:user_types,id',
             'status' => 'nullable|in:active,inactive,suspended',
         ]);
 
-        $user = User::findOrFail($id);
+        $user->update($data);
+        $user->load('type', 'organizations');
 
-        $user->update($request->only(['username', 'user_type_id', 'status']));
-
-        return response()->json($user);
+        return $this->successResponse($user, 'Cập nhật người dùng thành công');
     }
 
-    // Xoá user
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-
+        $user->organizations()->detach();
         $user->delete();
 
-        return response()->json(['message' => 'Deleted']);
+        return $this->successMessage('Xóa người dùng thành công');
     }
 
-    // Đặt lại mật khẩu user
     public function resetPassword(Request $request, $id)
     {
-        $request->validate([
+        $data = $request->validate([
             'new_password' => 'required|min:6',
         ]);
 
         $user = User::findOrFail($id);
-        $user->password_hash = bcrypt($request->new_password);
+        $user->password_hash = bcrypt($data['new_password']);
         $user->save();
 
-        return response()->json(['message' => 'Password reset successful']);
+        return $this->successMessage('Đặt lại mật khẩu thành công');
     }
 }

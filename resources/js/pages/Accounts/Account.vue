@@ -53,10 +53,8 @@ const activeComponent = computed(() => {
         <div
             class="bg-white w-full h-[600px] flex rounded-2xl shadow-xl overflow-hidden border border-gray-100"
         >
-            <!-- Sidebar -->
             <Sidebar :tabs="tabs" v-model:activeTab="activeTab" />
 
-            <!-- Main  -->
             <div class="flex-1 flex flex-col overflow-hidden">
                 <Header :title="tabs.find((t) => t.id === activeTab)?.label" />
 

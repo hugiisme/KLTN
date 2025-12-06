@@ -10,10 +10,8 @@ import OrganizationService from "@/services/OrganizationService.js";
 import UserService from "@/services/UserService.js";
 import Notification from "@/services/NotificationService.js";
 
-// tái sử dụng composable tree của Organizations
 import useOrgTree from "@/pages/Organizations/composables/useOrgTree.js";
 
-// ================= TREE =================
 const treeData = ref([]);
 const selectedNode = ref(null);
 
@@ -25,7 +23,12 @@ const {
     onTreeFilter,
 } = useOrgTree(treeData);
 
-// normalize node — quan trọng nhất!
+const users = ref([]);
+
+const isUserModalOpen = ref(false);
+const modalMode = ref("create");
+const modalInitialData = ref(null);
+
 function normalizeNode(node, parent = null) {
     return {
         ...node,
@@ -41,15 +44,12 @@ async function loadTree() {
     try {
         const res = await OrganizationService.getTree();
         treeData.value = res.map((n) => normalizeNode(n));
-        updateTreeToRender(); // bắt buộc để render lên UI
+        updateTreeToRender();
     } catch (e) {
         console.error(e);
         Notification.send("error", "Không load được cây tổ chức");
     }
 }
-
-// ================= USERS =================
-const users = ref([]);
 
 async function loadUsersByOrg(orgId) {
     if (!orgId) return (users.value = []);
@@ -67,11 +67,6 @@ function onSelectOrg(node) {
     loadUsersByOrg(node.id);
 }
 
-// ================= MODAL =================
-const isUserModalOpen = ref(false);
-const modalMode = ref("create");
-const modalInitialData = ref(null);
-
 function handleAction(action) {
     if (action === "create-user") {
         if (!selectedNode.value) {
@@ -80,7 +75,6 @@ function handleAction(action) {
                 "Chọn tổ chức trước khi thêm user"
             );
         }
-
         modalMode.value = "create";
         modalInitialData.value = { org_id: selectedNode.value.id };
         isUserModalOpen.value = true;
@@ -101,7 +95,10 @@ async function handleSubmit(data) {
             Notification.send("success", "Đã cập nhật người dùng");
         }
         isUserModalOpen.value = false;
-        loadUsersByOrg(selectedNode.value.id);
+
+        const orgId = selectedNode.value.id;
+        const res = await UserService.getByOrg(orgId);
+        users.value = Array.isArray(res) ? [...res] : [];
     } catch (e) {
         Notification.send("error", "Lỗi khi lưu người dùng");
         console.error(e);
@@ -110,20 +107,29 @@ async function handleSubmit(data) {
 
 async function deleteUser(id) {
     if (!confirm("Xóa người dùng này?")) return;
-    await UserService.delete(id);
-    Notification.send("success", "Đã xóa");
-    loadUsersByOrg(selectedNode.value.id);
+    try {
+        await UserService.delete(id);
+        Notification.send("success", "Đã xóa");
+        loadUsersByOrg(selectedNode.value.id);
+    } catch (e) {
+        console.error(e);
+        Notification.send("error", "Lỗi khi xóa người dùng");
+    }
 }
 
-// ================= INIT =================
+function openEditUserModal(row) {
+    modalMode.value = "edit";
+    modalInitialData.value = row;
+    isUserModalOpen.value = true;
+}
+
 onMounted(async () => {
-    await loadTree(); // quan trọng
+    await loadTree();
 });
 </script>
 
 <template>
     <div class="h-full flex flex-col gap-4 p-2">
-        <!-- HEADER -->
         <UpperPanel
             title="Quản lý người dùng"
             icon="fa-solid fa-users"
@@ -146,9 +152,7 @@ onMounted(async () => {
             @action="handleAction"
         />
 
-        <!-- MAIN -->
-        <div class="flex h-full gap-4">
-            <!-- LEFT - ORG TREE -->
+        <div class="flex h-full gap-4 overflow-hidden">
             <LeftPanel
                 ref="treePanelRef"
                 treeLabel="Danh sách tổ chức"
@@ -162,8 +166,8 @@ onMounted(async () => {
                 @filter="onTreeFilter"
             />
 
-            <!-- RIGHT - USER LIST -->
             <RightPanel
+                :key="selectedNode?.id"
                 title="Danh sách người dùng"
                 icon="fa-solid fa-users"
                 :selected="selectedNode"
@@ -175,18 +179,11 @@ onMounted(async () => {
                     { key: 'status', label: 'Trạng thái' },
                     { key: 'actions', label: 'Hành động', type: 'actions' },
                 ]"
-                @edit="
-                    (row) => {
-                        modalMode = 'edit';
-                        modalInitialData = row;
-                        isUserModalOpen = true;
-                    }
-                "
+                @edit="openEditUserModal"
                 @delete="(row) => deleteUser(row.id)"
             />
         </div>
 
-        <!-- MODAL -->
         <UserModal
             v-model="isUserModalOpen"
             :mode="modalMode"

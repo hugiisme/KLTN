@@ -9,10 +9,8 @@ const props = defineProps({
 
 const emit = defineEmits(["select", "toggle-expand"]);
 
-// expanded state map (id -> boolean)
 const expandedState = ref(new Map());
 
-// Reset expand state khi data thay đổi hoàn toàn
 watch(
     () => props.data,
     () => {
@@ -31,7 +29,6 @@ function toggleExpand(id) {
     expandedState.value = map;
 }
 
-// Expose API cho parent (AcademicYears.vue)
 defineExpose({
     expandNode(id) {
         const map = new Map(expandedState.value);
@@ -48,7 +45,6 @@ defineExpose({
     },
 });
 
-// emit wrapper
 function onSelect(node) {
     emit("select", node);
 }
@@ -60,7 +56,7 @@ function onToggleExpand(id) {
 </script>
 
 <template>
-    <div class="tree-view overflow-y-auto" role="tree">
+    <div class="tree-view" role="tree">
         <template v-for="node in props.data" :key="node.type + '-' + node.id">
             <TreeNode
                 :node="node"
@@ -77,8 +73,31 @@ function onToggleExpand(id) {
 
 <style scoped>
 .tree-view {
-    padding: 12px;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
     scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: #9ca3af #f3f4f6;
+    box-sizing: border-box;
+}
+
+.tree-view::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tree-view::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 3px;
+}
+
+.tree-view::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 3px;
+}
+
+.tree-view::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
 }
 </style>

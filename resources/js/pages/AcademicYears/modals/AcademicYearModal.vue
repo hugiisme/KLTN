@@ -9,15 +9,15 @@ const props = defineProps({
     initialData: { type: Object, default: null },
 });
 
-const emit = defineEmits(["update:modelValue", "submit"]);
+const emit = defineEmits(["update:modelValue", "submit", "delete"]);
 
-// FIX: tạo v-model proxy
+const formData = ref({ ...props.initialData });
+
 const modalVisible = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
 });
 
-const formData = ref({ ...props.initialData });
 watch(
     () => props.initialData,
     (newData) => {

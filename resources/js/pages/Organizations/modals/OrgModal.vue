@@ -1,16 +1,13 @@
-<!-- resources/js/pages/Organizations/modals/OrganizationModal.vue -->
 <script setup>
 import FormBuilder from "@/components/Form/FormBuilder.vue";
 import Modal from "@/components/Modal/Modal.vue";
 import { ref, computed, watch } from "vue";
 
-// Props với default an toàn
 const props = defineProps({
     modelValue: Boolean,
     mode: { type: String, default: "create" }, // create | edit
     initialData: { type: Object, default: null },
 
-    // dữ liệu dropdown
     parentOrganizations: { type: Array, default: () => [] },
     orgTypes: { type: Array, default: () => [] },
     orgLevels: { type: Array, default: () => [] },
@@ -18,16 +15,13 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "submit", "delete"]);
 
-// Proxy v-model
 const modalVisible = computed({
     get: () => props.modelValue,
     set: (val) => emit("update:modelValue", val),
 });
 
-// Form data reactive
 const formData = ref({ ...props.initialData });
 
-// Watch khi initialData thay đổi
 watch(
     () => props.initialData,
     (newData) => {
@@ -42,11 +36,9 @@ const parentOptions = computed(() => {
         : [];
 
     if (!items.length) {
-        // Nếu CSDL rỗng → disabled
         return [{ value: null, label: "Không có dữ liệu", disabled: true }];
     }
 
-    // Flatten tree
     const flattened = [];
     function walk(arr) {
         for (const n of arr) {
@@ -66,8 +58,6 @@ const parentOptions = computed(() => {
             if (o.id !== undefined && o.id !== null)
                 flattened.push({ value: o.id, label: name });
         }
-
-    // Luôn thêm option "không có tổ chức cha"
 
     return [{ value: null, label: "(Không có tổ chức cha)" }, ...flattened];
 });

@@ -27,7 +27,7 @@ defineExpose({ treeView });
     <div
         class="h-full w-80 bg-white border border-gray-300 rounded-xl shadow-sm flex flex-col overflow-hidden"
     >
-        <div class="p-3 border-b border-gray-100 bg-gray-50">
+        <div class="p-3 border-b border-gray-100 bg-gray-50 shrink-0">
             <h2
                 class="font-bold text-gray-700 text-center uppercase text-sm tracking-wide"
             >
@@ -35,21 +35,24 @@ defineExpose({ treeView });
             </h2>
         </div>
 
-        <TreeFilter
-            :fields="sortFields"
-            :types="filterTypes"
-            @search="emit('search', $event)"
-            @sort="emit('sort', $event)"
-            @filter="emit('filter', $event)"
-        />
+        <div class="shrink-0">
+            <TreeFilter
+                :fields="sortFields"
+                :types="filterTypes"
+                @search="emit('search', $event)"
+                @sort="emit('sort', $event)"
+                @filter="emit('filter', $event)"
+            />
+        </div>
 
-        <TreeView
-            ref="treeView"
-            class="flex-1 min-h-0 overflow-y-auto"
-            :data="props.treeData"
-            :selected="props.selected ?? null"
-            @select="emit('select', $event)"
-            @toggle-expand="emit('toggle-expand', $event)"
-        />
+        <div class="flex-1 min-h-0 overflow-hidden">
+            <TreeView
+                ref="treeView"
+                :data="props.treeData"
+                :selected="props.selected ?? null"
+                @select="emit('select', $event)"
+                @toggle-expand="emit('toggle-expand', $event)"
+            />
+        </div>
     </div>
 </template>

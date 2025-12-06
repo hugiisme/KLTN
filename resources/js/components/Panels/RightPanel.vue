@@ -38,8 +38,7 @@ const meta = ref({
 const currentPage = ref(1);
 const searchText = ref("");
 const selectedFilter = ref("");
-const sorter = ref({ field: "", direction: "asc" });
-
+const sorter = ref({ field: "id", direction: "asc" }); // Default sort by id
 const tableSort = ref({ field: null, direction: null });
 
 async function reload() {
@@ -116,7 +115,15 @@ watch(
     () => props.customRows,
     () => {
         if (props.customRows) {
-            reload();
+            rows.value = [...props.customRows];
+            meta.value = {
+                current_page: 1,
+                last_page: 1,
+                per_page: props.customRows.length,
+                total: props.customRows.length,
+                from: 1,
+                to: props.customRows.length,
+            };
         }
     },
     { deep: true }

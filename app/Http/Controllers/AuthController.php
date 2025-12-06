@@ -7,60 +7,48 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Traits\ApiResponse;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     public function login(Request $request)
     {
-        $request->validate([
+        $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('username', $request->username)->first();
+        $user = User::where('username', $credentials['username'])->first();
 
-        // Check nếu tìm thấy người dùng với username như trên và mật khẩu khớp
-        if (!$user || !Hash::check($request->password, $user->password_hash)) {
-            return response()->json(['message' => 'Sai tên đăng nhập hoặc mật khẩu'], 401);
+        if (!$user || !Hash::check($credentials['password'], $user->password_hash)) {
+            return $this->errorResponse('Sai tên đăng nhập hoặc mật khẩu', 401);
         }
 
-        // Check nếu người dùng bị khóa
         if ($user->status == 'inactive' || $user->status == 'suspended') {
-            return response()->json(['message' => 'Tài khoản của bạn đã bị khóa'], 403);
+            return $this->errorResponse('Tài khoản của bạn đã bị khóa', 403);
         }
 
         Auth::login($user);
-
         $request->session()->regenerate();
 
         Log::info('=== LOGIN SUCCESS ===');
         Log::info('User ID logged in: ' . Auth::id());
         Log::info('Generated Session ID: ' . $request->session()->getId());
-        Log::info('Session Config Domain: ' . config('session.domain'));
 
-        // (Tùy chọn) Nếu bạn muốn lưu thêm thông tin tùy chỉnh vào session
-        // $request->session()->put('key', 'value');
-
-        return response()->json(
-            [
-                'message' => 'Đăng nhập thành công',
-                'user' => [
-                    'id' => $user->id,
-                    'username' => $user->username,
-                ]
-            ],
-            200
-        );
+        return $this->successResponse([
+            'id' => $user->id,
+            'username' => $user->username,
+        ], 'Đăng nhập thành công');
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Đăng xuất thành công'], 200);
+        return $this->successMessage('Đăng xuất thành công');
     }
 }

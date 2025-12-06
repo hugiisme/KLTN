@@ -7,7 +7,6 @@ export default function useAcademicTree(treeData) {
     const currentSort = ref({ field: "label", direction: "asc" });
     const currentFilter = ref("all");
 
-    // Hàm chuẩn hóa node: luôn có label và children là mảng
     function normalizeNode(node) {
         if (!node) return null;
         return {
@@ -19,68 +18,77 @@ export default function useAcademicTree(treeData) {
         };
     }
 
-    // Update tree để render
+    function filterTreeByType(nodes, filterType) {
+        const filterByType = (items) =>
+            items
+                .map((node) => {
+                    const match = node.type === filterType;
+                    const children = node.children
+                        ? filterByType(node.children)
+                        : [];
+                    if (match || children.length) return { ...node, children };
+                })
+                .filter(Boolean);
+        return filterByType(nodes);
+    }
+
+    function searchInTree(nodes, text) {
+        const searchTree = (items) =>
+            items
+                .map((node) => {
+                    const match = node.label
+                        .toLowerCase()
+                        .includes(text.toLowerCase());
+                    const children = node.children
+                        ? searchTree(node.children)
+                        : [];
+                    if (match || children.length) return { ...node, children };
+                })
+                .filter(Boolean);
+        return searchTree(nodes);
+    }
+
+    function sortTreeByField(nodes, field, direction) {
+        const sortTree = (items) =>
+            [...items]
+                .sort((a, b) => {
+                    const av = a[field] ?? "";
+                    const bv = b[field] ?? "";
+                    if (av < bv) return direction === "asc" ? -1 : 1;
+                    if (av > bv) return direction === "asc" ? 1 : -1;
+                    return 0;
+                })
+                .map((node) => {
+                    if (node.children) {
+                        node.children = sortTree(node.children);
+                    }
+                    return node;
+                });
+        return sortTree(nodes);
+    }
+
+    const academicYears = computed(() => {
+        const data = Array.isArray(treeData.value) ? treeData.value : [];
+        return data
+            .filter((n) => n.type === "academic_year")
+            .map((n) => ({ id: n.id, label: n.label }));
+    });
+
     function updateTreeToRender() {
         try {
             let temp = Array.isArray(treeData.value)
                 ? treeData.value.map(normalizeNode)
                 : [];
-            // Filter theo type
+
             if (currentFilter.value !== "all") {
-                const filterByType = (nodes) =>
-                    nodes
-                        .map((node) => {
-                            const match = node.type === currentFilter.value;
-                            const children = node.children
-                                ? filterByType(node.children)
-                                : [];
-                            if (match || children.length)
-                                return { ...node, children };
-                        })
-                        .filter(Boolean);
-                temp = filterByType(temp);
+                temp = filterTreeByType(temp, currentFilter.value);
             }
 
-            // Search theo label
             if (currentSearch.value) {
-                const searchTree = (nodes, text) =>
-                    nodes
-                        .map((node) => {
-                            const match = node.label
-                                .toLowerCase()
-                                .includes(text.toLowerCase());
-                            const children = node.children
-                                ? searchTree(node.children, text)
-                                : [];
-                            if (match || children.length)
-                                return { ...node, children };
-                        })
-                        .filter(Boolean);
-                temp = searchTree(temp, currentSearch.value);
+                temp = searchInTree(temp, currentSearch.value);
             }
 
-            // Sort
-            const sortTree = (nodes, field, direction) =>
-                [...nodes]
-                    .sort((a, b) => {
-                        const av = a[field] ?? "";
-                        const bv = b[field] ?? "";
-                        if (av < bv) return direction === "asc" ? -1 : 1;
-                        if (av > bv) return direction === "asc" ? 1 : -1;
-                        return 0;
-                    })
-                    .map((node) => {
-                        if (node.children) {
-                            node.children = sortTree(
-                                node.children,
-                                field,
-                                direction
-                            );
-                        }
-                        return node;
-                    });
-
-            temp = sortTree(
+            temp = sortTreeByField(
                 temp,
                 currentSort.value.field,
                 currentSort.value.direction
@@ -94,15 +102,6 @@ export default function useAcademicTree(treeData) {
         }
     }
 
-    // Computed list of academic years
-    const academicYears = computed(() => {
-        const data = Array.isArray(treeData.value) ? treeData.value : [];
-        return data
-            .filter((n) => n.type === "academic_year")
-            .map((n) => ({ id: n.id, label: n.label }));
-    });
-
-    // Event handlers
     function onTreeSearch({ text }) {
         currentSearch.value = text;
         updateTreeToRender();

@@ -38,7 +38,6 @@ function onSortChange() {
     <div
         class="flex gap-3 mb-2 items-center bg-gray-50 p-3 rounded-lg border border-gray-100"
     >
-        <!-- Search -->
         <div class="relative flex-1">
             <input
                 type="text"
@@ -52,7 +51,6 @@ function onSortChange() {
             </span>
         </div>
 
-        <!-- Filter field only -->
         <select
             v-if="filters?.length"
             v-model="selectedFilter"
@@ -65,7 +63,6 @@ function onSortChange() {
             </option>
         </select>
 
-        <!-- Sorter -->
         <div v-if="sorters?.length" class="flex gap-2">
             <select
                 v-model="selectedSorter"

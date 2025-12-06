@@ -1,4 +1,8 @@
 import axios from "axios";
+
 export default {
-    getAll: () => axios.get("/api/manage/org-levels").then((r) => r.data),
+    async getAll() {
+        const response = await axios.get("/api/manage/org-levels");
+        return response.data.data ?? [];
+    },
 };
