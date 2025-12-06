@@ -46,4 +46,11 @@ export default {
             remark: remark,
         });
     },
+    async getPendingRequests(orgId) {
+        return (
+            await axios.get(
+                `/api/manage/organizations/${orgId}/pending-requests`
+            )
+        ).data;
+    },
 };

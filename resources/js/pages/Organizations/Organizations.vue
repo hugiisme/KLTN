@@ -5,6 +5,7 @@ import LeftPanel from "@/components/Panels/LeftPanel.vue";
 import RightPanel from "@/components/Panels/RightPanel.vue";
 import UpperPanel from "@/components/Panels/UpperPanel.vue";
 import OrgModal from "./modals/OrgModal.vue";
+import PendingRequestsModal from "./modals/PendingRequestsModal.vue";
 
 import useOrgTree from "./composables/useOrgTree";
 import useOrganization from "./composables/useOrganization";
@@ -29,6 +30,10 @@ const parentOrgs = ref([]);
 const isOrgModalOpen = ref(false);
 const modalMode = ref("create");
 const modalInitialData = ref(null);
+
+const isPendingModalOpen = ref(false);
+const pendingRequests = ref([]);
+const pendingOrg = ref(null);
 
 // Load dropdown data
 async function loadDropdowns() {
@@ -113,6 +118,20 @@ function handleUpperAction(event) {
     if (event === "create-org") openCreateOrgModal();
     if (event === "edit-org") openEditOrgModal(selectedNode.value);
 }
+
+async function openPendingModal(org) {
+    try {
+        pendingOrg.value = org;
+
+        const res = await OrganizationService.getPendingRequests(org.id);
+        pendingRequests.value = res.data ?? [];
+
+        isPendingModalOpen.value = true;
+    } catch (err) {
+        console.error(err);
+        Notification.send("error", "Không tải được danh sách chờ duyệt");
+    }
+}
 </script>
 
 <template>
@@ -175,12 +194,22 @@ function handleUpperAction(event) {
                     { key: 'org_type.name', label: 'Loại' },
                     { key: 'org_level.equivalent_name', label: 'Cấp' },
                     { key: 'actions', label: 'Hành động', type: 'actions' },
+                    { key: 'pending', label: 'Chờ duyệt' },
                 ]"
                 :filters="[{ name: 'label', label: 'Tên' }]"
                 :sorters="[{ name: 'label', label: 'Tên' }]"
                 @edit="openEditOrgModal"
                 @delete="deleteOrg"
-            />
+            >
+                <template #cell-pending="{ row }">
+                    <button
+                        class="px-3 py-1 rounded bg-indigo-200 text-indigo-800 text-sm hover:bg-indigo-300"
+                        @click.stop="openPendingModal(row)"
+                    >
+                        Chờ duyệt
+                    </button>
+                </template>
+            </RightPanel>
         </div>
     </div>
 
@@ -193,5 +222,10 @@ function handleUpperAction(event) {
         :parentOrganizations="parentOrgs"
         @submit="handleOrgSubmit"
         @delete="(id) => deleteOrg({ id })"
+    />
+    <PendingRequestsModal
+        v-model="isPendingModalOpen"
+        :org="pendingOrg"
+        :requests="pendingRequests"
     />
 </template>

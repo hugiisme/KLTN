@@ -41,7 +41,7 @@ Route::get('/manage/organizations/{id}', [OrganizationController::class, 'show']
 Route::post('/manage/organizations', [OrganizationController::class, 'store']);
 Route::put('/manage/organizations/{id}', [OrganizationController::class, 'update']);
 Route::delete('/manage/organizations/{id}', [OrganizationController::class, 'destroy']);
-Route::get('/organizations/{id}/users', [OrganizationController::class, 'getUsers']);
+Route::get('/manage/organizations/{id}/users', [OrganizationController::class, 'getUsers']);
 
 Route::get('/manage/org-types', [OrgTypeController::class, 'index']);
 Route::get('/manage/org-levels', [OrgLevelController::class, 'index']);

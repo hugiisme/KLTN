@@ -2,7 +2,9 @@ import axios from "axios";
 
 export default {
     async getByOrg(orgId) {
-        const response = await axios.get(`/api/organizations/${orgId}/users`);
+        const response = await axios.get(
+            `/api/manage/organizations/${orgId}/users`
+        );
         return response.data.data ?? [];
     },
 

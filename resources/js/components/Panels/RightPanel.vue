@@ -191,7 +191,15 @@ const totalPages = computed(() => meta.value.last_page || 1);
             @edit="emit('edit', $event)"
             @delete="emit('delete', $event)"
             @sort="onTableSort"
-        />
+        >
+            <template
+                v-for="(slot, name) in $slots"
+                :key="name"
+                v-slot:[name]="slotProps"
+            >
+                <slot :name="name" v-bind="slotProps" />
+            </template>
+        </DataTable>
 
         <p v-else class="text-gray-500 italic">
             Vui lòng chọn một mục để xem danh sách.

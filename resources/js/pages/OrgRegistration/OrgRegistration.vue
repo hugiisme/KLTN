@@ -98,7 +98,7 @@ function openJoinModal(org) {
 async function handleConfirmJoin({ org_id, remark }) {
     try {
         console.log("CONFIRM RECEIVED:", { org_id, remark });
-        await OrganizationService.sendJoinRequest(org_id, remark);
+        await OrganizationService.sendJoinRequest(org_id, remark ?? null);
 
         Notification.send("success", "Đã gửi yêu cầu tham gia thành công!");
 

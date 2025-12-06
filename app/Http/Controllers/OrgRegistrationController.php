@@ -44,7 +44,7 @@ class OrgRegistrationController extends Controller
     {
         $request->validate([
             'org_id' => 'required|exists:organizations,id',
-            'remark' => 'required|string|max:500',
+            'remark' => 'nullable|string|max:500',
         ]);
 
         $user = $request->user();

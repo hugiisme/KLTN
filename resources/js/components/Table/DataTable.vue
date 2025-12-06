@@ -104,7 +104,14 @@ function getSortIcon(col) {
                         :key="col.key"
                         class="px-6 py-4 whitespace-nowrap text-base text-gray-800 font-medium"
                     >
-                        <div v-if="col.type === 'actions'" class="flex gap-2">
+                        <template v-if="$slots[`cell-${col.key}`]">
+                            <slot :name="`cell-${col.key}`" :row="row" />
+                        </template>
+
+                        <div
+                            v-else-if="col.type === 'actions'"
+                            class="flex gap-2"
+                        >
                             <button
                                 class="px-3 py-1 rounded bg-yellow-200 text-yellow-800 text-sm hover:bg-yellow-300"
                                 @click.stop="emit('edit', row)"

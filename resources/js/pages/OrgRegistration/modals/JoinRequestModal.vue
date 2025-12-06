@@ -41,7 +41,7 @@ function handleSubmit(data) {
     }
 
     const remarkValue = data?.remark ?? formData.value.remark ?? "";
-    const safeRemark = remarkValue?.trim() || "(không có ghi chú)";
+    const safeRemark = remarkValue?.trim() === "" ? null : remarkValue.trim();
 
     Notification.send("info", "Đang gửi yêu cầu...");
     emit("confirm", {
