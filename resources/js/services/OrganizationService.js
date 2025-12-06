@@ -56,4 +56,16 @@ export default {
         );
         return response.data.data ?? [];
     },
+
+    async approveJoinRequest(requestId) {
+        return axios.post(`/api/manage/org-requests/${requestId}/approve`);
+    },
+
+    async rejectJoinRequest(requestId) {
+        return axios.post(`/api/manage/org-requests/${requestId}/reject`);
+    },
+
+    async updateRequestStatus(id, status) {
+        return axios.patch(`/api/manage/org-requests/${id}`, { status });
+    },
 };

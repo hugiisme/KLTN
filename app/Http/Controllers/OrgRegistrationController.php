@@ -7,6 +7,7 @@ use App\Models\Organization;
 use App\Models\OrgJoinRequest;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\DB;
 
 class OrgRegistrationController extends Controller
 {
@@ -20,26 +21,35 @@ class OrgRegistrationController extends Controller
             return $this->errorResponse('Chưa xác thực', 401);
         }
 
-        $joinedOrgs = $user->organizations()->with('type')->get();
+        // tổ chức đã tham gia (approved & nằm trong bảng user_orgs)
+        $joinedOrgIds = $user->organizations()->pluck('organizations.id');
 
-        $pendingOrgIds = OrgJoinRequest::query()
-            ->where('user_id', $user->id)
+        // yêu cầu đang chờ duyệt
+        $pendingOrgIds = OrgJoinRequest::where('user_id', $user->id)
             ->where('status', 'pending')
             ->pluck('org_id');
 
+        // yêu cầu bị từ chối
+        $rejectedOrgIds = OrgJoinRequest::where('user_id', $user->id)
+            ->where('status', 'rejected')
+            ->pluck('org_id');
+
+        // khóa loại exclusive
         $exclusiveMap = [];
-        foreach ($joinedOrgs as $org) {
-            if ($org->type && $org->type->is_exclusive) {
+        foreach ($user->organizations()->with('type')->get() as $org) {
+            if ($org->type && $org->type->is_exclusive == 1) {
                 $exclusiveMap[$org->type->id] = $org->id;
             }
         }
 
         return $this->successResponse([
-            'joined_org_ids' => $joinedOrgs->pluck('id')->toArray(),
-            'pending_org_ids' => $pendingOrgIds->toArray(),
-            'exclusive_map' => $exclusiveMap,
+            'joined_org_ids'    => $joinedOrgIds->toArray(),
+            'pending_org_ids'   => $pendingOrgIds->toArray(),
+            'rejected_org_ids'  => $rejectedOrgIds->toArray(),   // 🔥 bổ sung bắt buộc
+            'exclusive_map'     => $exclusiveMap,
         ], 'Trạng thái tổ chức của bạn');
     }
+
 
     public function sendRequest(Request $request)
     {
@@ -92,5 +102,67 @@ class OrgRegistrationController extends Controller
         ]);
 
         return $this->successMessage('Gửi yêu cầu thành công!', 201);
+    }
+
+    public function getPendingRequests($orgId)
+    {
+        $requests = OrgJoinRequest::with('user')
+            ->where('org_id', $orgId)
+            ->where('status', 'pending')
+            ->get();
+
+        return $this->successResponse($requests, "Danh sách chờ duyệt");
+    }
+
+    public function approveRequest($requestId)
+    {
+        $request = OrgJoinRequest::findOrFail($requestId);
+
+        DB::transaction(function () use ($request) {
+            $request->update(['status' => 'approved']);
+
+            DB::table('user_orgs')->insertOrIgnore([
+                'user_id' => $request->user_id,
+                'org_id'  => $request->org_id
+            ]);
+        });
+
+        return $this->successMessage('Duyệt thành công');
+    }
+
+    public function rejectRequest($requestId)
+    {
+        $request = OrgJoinRequest::findOrFail($requestId);
+        $request->update(['status' => 'rejected']);
+
+        return $this->successMessage('Đã từ chối yêu cầu');
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,rejected'
+        ]);
+
+        $join = OrgJoinRequest::findOrFail($id);
+
+        if ($join->status === 'approved') {
+            return response()->json(['message' => 'Approved request cannot be modified'], 400);
+        }
+
+        $join->update(['status' => $request->status]);
+
+        // Nếu approved → gán user vào tổ chức
+        if ($request->status === 'approved') {
+            DB::table('user_orgs')->updateOrInsert([
+                'user_id' => $join->user_id,
+                'org_id'  => $join->org_id
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Status updated successfully',
+            'data'    => $join
+        ]);
     }
 }

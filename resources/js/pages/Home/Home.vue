@@ -269,7 +269,7 @@ const profileCompletion = 75;
 
             <div class="lg:col-span-1 space-y-8">
                 <div
-                    class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group"
+                    class="bg-linear-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group"
                 >
                     <div
                         class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition"

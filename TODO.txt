@@ -17,3 +17,6 @@ update người dùng đang lỗi
 
 thêm file attachments
 giữ tree state open tới node đc chọn
+
+Thêm thông tin người dùng cho modal danh sách yêu cầu tham gia của tổ chức
+Hiển thị dạng bảng, show tất cả lịch sử duyệt (hiện tại đang lọc chỉ pending)

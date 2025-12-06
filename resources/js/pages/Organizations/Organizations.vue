@@ -110,7 +110,9 @@ async function openPendingModal(org) {
     try {
         pendingOrg.value = org;
         const res = await OrganizationService.getPendingRequests(org.id);
-        pendingRequests.value = res.data ?? [];
+        // pendingRequests.value = res.data ?? [];
+        pendingRequests.value = res;
+
         isPendingModalOpen.value = true;
     } catch (err) {
         console.error(err);
@@ -217,5 +219,6 @@ onMounted(async () => {
         v-model="isPendingModalOpen"
         :org="pendingOrg"
         :requests="pendingRequests"
+        @updated="openPendingModal(pendingOrg)"
     />
 </template>

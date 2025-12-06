@@ -84,4 +84,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Pending Requests (Admin)
     Route::get('/manage/organizations/{id}/pending-requests', [OrganizationController::class, 'getPendingRequests']);
+    Route::post('/manage/org-requests/{requestId}/approve', [OrganizationController::class, 'approveRequest']);
+    Route::post('/manage/org-requests/{requestId}/reject', [OrganizationController::class, 'rejectRequest']);
+    Route::patch('/manage/org-requests/{id}', [OrgRegistrationController::class, 'updateStatus']);
 });

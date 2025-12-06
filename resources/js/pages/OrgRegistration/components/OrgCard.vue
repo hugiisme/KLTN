@@ -28,6 +28,12 @@ const statusConfig = computed(() => {
                 class: "bg-red-50 text-red-400 cursor-not-allowed",
                 icon: "fa-solid fa-ban",
             };
+        case "rejected":
+            return {
+                label: "Đã bị từ chối",
+                class: "bg-red-100 text-red-600 cursor-not-allowed",
+                icon: "fa-solid fa-xmark",
+            };
         default:
             return {
                 label: "Đăng ký tham gia",

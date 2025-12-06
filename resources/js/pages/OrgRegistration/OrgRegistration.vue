@@ -1,23 +1,14 @@
 <script setup>
-// =============================================================================
-// COMPONENTS
-// =============================================================================
 import { ref, onMounted, computed } from "vue";
 import LeftPanel from "@/components/Panels/LeftPanel.vue";
 import UpperPanel from "@/components/Panels/UpperPanel.vue";
 import OrgCard from "./components/OrgCard.vue";
 import JoinRequestModal from "./modals/JoinRequestModal.vue";
 
-// =============================================================================
-// SERVICES & COMPOSABLES
-// =============================================================================
 import useOrgTree from "@/pages/Organizations/composables/useOrgTree";
 import OrganizationService from "@/services/OrganizationService.js";
 import Notification from "@/services/NotificationService.js";
 
-// =============================================================================
-// STATE
-// =============================================================================
 const treeData = ref([]);
 const selectedNode = ref(null);
 const isJoinModalOpen = ref(false);
@@ -26,12 +17,10 @@ const selectedOrgToJoin = ref(null);
 const userMembership = ref({
     joined_org_ids: [],
     pending_org_ids: [],
+    rejected_org_ids: [],
     exclusive_map: {},
 });
 
-// =============================================================================
-// COMPOSABLE
-// =============================================================================
 const {
     treeToRender,
     updateTreeToRender,
@@ -41,24 +30,19 @@ const {
     normalizeNode,
 } = useOrgTree(treeData);
 
-// =============================================================================
-// COMPUTED
-// =============================================================================
 const displayOrgs = computed(() => {
     if (!selectedNode.value) return [];
     return selectedNode.value.children || [];
 });
 
-// =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
 function getUserStatusForOrg(org) {
     if (!userMembership.value || !org) return "available";
 
     if (userMembership.value.joined_org_ids?.includes(org.id)) return "joined";
-
     if (userMembership.value.pending_org_ids?.includes(org.id))
         return "pending";
+    if (userMembership.value.rejected_org_ids?.includes(org.id))
+        return "rejected";
 
     if (org.org_type && org.org_type.is_exclusive === 1) {
         const typeId = org.org_type.id;
@@ -69,6 +53,8 @@ function getUserStatusForOrg(org) {
             return "blocked_exclusive";
         }
     }
+    if (userMembership.value.rejected_org_ids?.includes(org.id))
+        return "rejected";
 
     return "available";
 }
@@ -80,6 +66,7 @@ async function loadData() {
             OrganizationService.getMyStatus().catch(() => ({
                 joined_org_ids: [],
                 pending_org_ids: [],
+                rejected_org_ids: [],
                 exclusive_map: {},
             })),
         ]);
@@ -102,7 +89,9 @@ async function handleConfirmJoin({ org_id, remark }) {
     try {
         await OrganizationService.sendJoinRequest(org_id, remark ?? null);
         Notification.send("success", "Đã gửi yêu cầu tham gia thành công!");
+
         userMembership.value.pending_org_ids.push(org_id);
+        await loadData();
         isJoinModalOpen.value = false;
         selectedOrgToJoin.value = null;
     } catch (e) {
@@ -111,9 +100,7 @@ async function handleConfirmJoin({ org_id, remark }) {
     }
 }
 
-onMounted(() => {
-    loadData();
-});
+onMounted(() => loadData());
 </script>
 
 <template>
