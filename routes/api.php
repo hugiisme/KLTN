@@ -13,6 +13,7 @@ use App\Http\Controllers\UserTypeController;
 use App\Http\Controllers\OrgRegistrationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ActivityController;
 
 // ============== UTILITY ==============
 
@@ -70,6 +71,10 @@ Route::post('/manage/users/{id}/reset-password', [UserController::class, 'resetP
 // User Types
 Route::get('/manage/user-types', [UserTypeController::class, 'index']);
 
+// Activity Types & Categories
+Route::get('/manage/activity-types', [ActivityController::class, 'getActivityTypes']);
+Route::get('/manage/activity-categories', [ActivityController::class, 'getActivityCategories']);
+
 // ============== AUTHENTICATED ENDPOINTS ==============
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -88,3 +93,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/manage/org-requests/{requestId}/reject', [OrganizationController::class, 'rejectRequest']);
     Route::patch('/manage/org-requests/{id}', [OrgRegistrationController::class, 'updateStatus']);
 });
+
+Route::get('/manage/activities', [ActivityController::class, 'index']);
+Route::get('/manage/activities/{id}', [ActivityController::class, 'show']);
+Route::post('/manage/activities', [ActivityController::class, 'store']);
+Route::put('/manage/activities/{id}', [ActivityController::class, 'update']);
+Route::delete('/manage/activities/{id}', [ActivityController::class, 'destroy']);

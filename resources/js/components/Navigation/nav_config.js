@@ -70,7 +70,7 @@ export default [
     // ================== TỔ CHỨC ==================
     {
         name: "CLB – Đội – Nhóm",
-        url: "/organizations",
+        url: "",
         children: [
             {
                 name: "Khám phá CLB",

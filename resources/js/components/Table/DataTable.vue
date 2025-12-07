@@ -41,6 +41,17 @@ function getValue(obj, key) {
     return cur;
 }
 
+function formatValue(col, row) {
+    const raw = getValue(row, col.key);
+    if (typeof col.formatter === "function") {
+        return col.formatter(raw, row);
+    }
+    if (col.type === "date") {
+        return formatDate(raw);
+    }
+    return raw;
+}
+
 function toggleSort(col) {
     if (!col.sortable) return;
 
@@ -124,6 +135,13 @@ function getSortIcon(col) {
                         </div>
 
                         <span
+                            v-else-if="col.type === 'status_badge'"
+                            class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800"
+                        >
+                            {{ formatValue(col, row) }}
+                        </span>
+
+                        <span
                             v-else
                             :class="
                                 col.type === 'date'
@@ -131,11 +149,7 @@ function getSortIcon(col) {
                                     : ''
                             "
                         >
-                            {{
-                                col.type === "date"
-                                    ? formatDate(getValue(row, col.key))
-                                    : getValue(row, col.key)
-                            }}
+                            {{ formatValue(col, row) }}
                         </span>
                     </td>
                 </tr>

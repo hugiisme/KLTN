@@ -20,3 +20,11 @@ giữ tree state open tới node đc chọn
 
 Thêm thông tin người dùng cho modal danh sách yêu cầu tham gia của tổ chức
 Hiển thị dạng bảng, show tất cả lịch sử duyệt (hiện tại đang lọc chỉ pending)
+
+làm calendar view cho hoạt động
+tạo preview panel như notion
+kéo thả hoạt động (progress view như trello)
+
+cần mã hóa tổ chức
+tối ưu hóa bảng hoạt động (đang hiển thị quá nhiều cột)
+rightpanel đang có thể đẩy left panel

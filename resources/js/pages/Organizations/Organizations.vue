@@ -84,6 +84,9 @@ async function loadDropdowns() {
         orgTypes.value = types;
         orgLevels.value = levels;
         parentOrgs.value = parents;
+
+        treeData.value = parents.map(normalizeNode);
+        updateTreeToRender();
     } catch (err) {
         console.error(err);
         Notification.send("error", "Lỗi khi load dữ liệu tổ chức");
@@ -122,7 +125,6 @@ async function openPendingModal(org) {
 
 onMounted(async () => {
     await loadDropdowns();
-    await loadTree();
 });
 </script>
 

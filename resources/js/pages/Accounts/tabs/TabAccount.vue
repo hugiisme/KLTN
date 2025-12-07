@@ -45,7 +45,7 @@ const statusConfig = computed(() => {
 const loadUser = async () => {
     try {
         const res = await window.axios.get("/api/me");
-        const data = res.data && res.data.user ? res.data.user : res.data;
+        const data = res.data && res.data.data ? res.data.data : res.data;
 
         account.value = {
             username: data.username || "",
