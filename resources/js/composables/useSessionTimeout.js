@@ -14,6 +14,16 @@ export const useSessionTimeout = () => {
         } catch (error) {
             console.error("Logout error", error);
         } finally {
+            // Save notification to localStorage
+            localStorage.setItem(
+                "sessionTimeoutNotification",
+                JSON.stringify({
+                    type: "warning",
+                    message:
+                        "Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+                    duration: 5 * 60 * 1000,
+                })
+            );
             window.location.href = "/login";
         }
     };

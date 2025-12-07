@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import LoginInput from "./LoginInput.vue";
 import NotificationList from "@/components/Notifications/NotificationList.vue";
 import Notification from "@/services/NotificationService.js";
@@ -12,6 +12,20 @@ const password = ref("");
 const errors = ref({
     username: "",
     password: "",
+});
+
+onMounted(() => {
+    // Check if there's a session timeout notification
+    const notification = localStorage.getItem("sessionTimeoutNotification");
+    if (notification) {
+        try {
+            const data = JSON.parse(notification);
+            Notification.send(data.type, data.message, data.duration);
+            localStorage.removeItem("sessionTimeoutNotification");
+        } catch (error) {
+            console.error("Error parsing notification", error);
+        }
+    }
 });
 
 const frontendValidate = () => {
