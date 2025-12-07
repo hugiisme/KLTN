@@ -56,6 +56,31 @@ const router = createRouter({
     routes,
 });
 
+// Check if user is authenticated
+const isAuthenticated = async () => {
+    try {
+        const response = await window.axios.get("/api/me");
+        return !!response.data;
+    } catch (error) {
+        return false;
+    }
+};
+
+router.beforeEach(async (to, from, next) => {
+    // List of routes that don't require authentication
+    const publicRoutes = ["/login"];
+
+    const isPublic = publicRoutes.includes(to.path);
+    const authenticated = await isAuthenticated();
+
+    if (!authenticated && !isPublic) {
+        // Redirect to login if not authenticated
+        next("/login");
+    } else {
+        next();
+    }
+});
+
 router.afterEach((to) => {
     document.title = to.meta.title || "My App";
 });

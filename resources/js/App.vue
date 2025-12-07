@@ -1,6 +1,9 @@
 <script setup>
 import NotificationList from "@/components/Notifications/NotificationList.vue";
 import NavBar from "@/components/Navigation/NavBar.vue";
+import { useSessionTimeout } from "@/composables/useSessionTimeout";
+
+useSessionTimeout();
 </script>
 
 <template>
