@@ -51,7 +51,7 @@ const activeComponent = computed(() => {
 <template>
     <div class="bg-gray-50 flex items-center justify-center px-3">
         <div
-            class="bg-white w-full h-[600px] flex rounded-2xl shadow-xl overflow-hidden border border-gray-100"
+            class="bg-white w-full h-[600px] flex rounded-2xl shadow-xl overflow-hidden border border-gray-300"
         >
             <Sidebar :tabs="tabs" v-model:activeTab="activeTab" />
 
