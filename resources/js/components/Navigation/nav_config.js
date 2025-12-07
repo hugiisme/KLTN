@@ -1,10 +1,11 @@
 export default [
+    // ================== TRANG CHỦ ==================
     {
         name: "Trang chủ",
         url: "/",
     },
 
-    // ================== QUẢN TRỊ ==================
+    // ================== QUẢN TRỊ HỆ THỐNG ==================
     {
         name: "Quản trị hệ thống",
         url: "",
@@ -22,32 +23,45 @@ export default [
                 url: "/manage/users",
             },
             {
-                name: "Nhóm người dùng",
-                url: "/manage/user-groups",
-            },
-
-            {
-                name: "Nghiệp vụ",
-                url: "",
-                children: [
-                    {
-                        name: "Hoạt động",
-                        url: "/manage/activities",
-                    },
-                    {
-                        name: "Thi đua",
-                        url: "/manage/awards",
-                    },
-                    {
-                        name: "Nghiên cứu khoa học",
-                        url: "/manage/research",
-                    },
-                ],
+                name: "Phân quyền & vai trò",
+                url: "/manage/permissions",
             },
         ],
     },
 
-    // ================== HOẠT ĐỘNG ==================
+    // ================== QUẢN LÝ NGHIỆP VỤ ==================
+    {
+        name: "Quản lý nghiệp vụ",
+        url: "",
+        children: [
+            {
+                name: "Hoạt động",
+                url: "/manage/activities",
+            },
+            {
+                name: "Đánh giá & Khen thưởng",
+                url: "/manage/awards",
+            },
+        ],
+    },
+
+    // ================== THỐNG KÊ & BÁO CÁO ==================
+    {
+        name: "Thống kê & Báo cáo",
+        url: "",
+        children: [
+            {
+                name: "Tổng hợp số liệu",
+                url: "/reports/overview",
+            },
+            {
+                name: "Báo cáo chi tiết",
+                url: "/reports/export",
+            },
+        ],
+    },
+
+    // ================== HOẠT ĐỘNG NGƯỜI DÙNG ==================
     {
         name: "Hoạt động",
         url: "",
@@ -55,10 +69,6 @@ export default [
             {
                 name: "Tổng hợp hoạt động",
                 url: "/activities",
-            },
-            {
-                name: "Hoạt động của tôi",
-                url: "/activities/my-activities",
             },
             {
                 name: "Đề tài NCKH",
@@ -69,11 +79,11 @@ export default [
 
     // ================== TỔ CHỨC ==================
     {
-        name: "CLB – Đội – Nhóm",
+        name: "Tổ chức",
         url: "",
         children: [
             {
-                name: "Khám phá CLB",
+                name: "Khám phá tổ chức",
                 url: "/organizations/directory",
             },
             {
@@ -83,10 +93,10 @@ export default [
         ],
     },
 
-    // ================== Khen thưởng ==================
+    // ================== THI ĐUA - CÁ NHÂN ==================
     {
-        name: "Thi đua & Khen thưởng",
-        url: "/awards",
+        name: "Thi đua & Thành tích",
+        url: "",
         children: [
             {
                 name: "Các đợt thi đua",
@@ -97,5 +107,11 @@ export default [
                 url: "/awards/my-achievements",
             },
         ],
+    },
+
+    // ================== THÔNG BÁO & TƯƠNG TÁC ==================
+    {
+        name: "Thông báo",
+        url: "",
     },
 ];

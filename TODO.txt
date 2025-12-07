@@ -1,30 +1,33 @@
-Trong Quản lý năm học - học kỳ:
-    Có thể tạo năm học invalid bằng cách tạo năm học với ngày sai, tạo học kì với ngày sai rồi tạo năm học với ngày đúng
-    ví dụ: tạo năm học 2024-2025 rồi tạo học kì trong khoảng đó rồi sửa năm học lại thành 2010-2011
-
-Bảng update có delay 
-
-Mỗi lần update treeview lại đóng hết vào, tìm cách giữ trạng thái
-Sửa treefilter (nhất là cho org)
-
-Chưa có xóa tổ chức
-Delay khi load trang là quá nhiều
-
-Update thì right panel và modal chưa reload để update theo, mới chỉ có tree update
-
-sửa filter sorter trong rightpanel cho org
-update người dùng đang lỗi
-
-thêm file attachments
-giữ tree state open tới node đc chọn
-
-Thêm thông tin người dùng cho modal danh sách yêu cầu tham gia của tổ chức
-Hiển thị dạng bảng, show tất cả lịch sử duyệt (hiện tại đang lọc chỉ pending)
-
-làm calendar view cho hoạt động
-tạo preview panel như notion
-kéo thả hoạt động (progress view như trello)
-
-cần mã hóa tổ chức
-tối ưu hóa bảng hoạt động (đang hiển thị quá nhiều cột)
-rightpanel đang có thể đẩy left panel
+Chung:
+    Trang update có delay do mvc cần chờ để load dữ liệu 
+Component:
+    Cần tìm cách lưu và giữ trạng thái của TreeView
+    Sửa RightPanel: Khi chưa có gì được chọn trong LeftPanel thì hiển thị toàn bộ
+    Sửa RightPanel: hỗ trợ tabs
+    Tạo preview Panel như notion
+    Tạo modal cho confirm
+    Sửa FormBuilder có loại select đặc biệt cho phép search và loại select cho phép multi select
+Database:
+    Tạo bảng file_attachments chung
+Quản lý năm học - học kỳ:
+    Xử lý RightPanel khi click vào học kỳ
+    Xử lý lại validate khe thời gian, hiện tại có thể tạo thời gian đúng rồi sửa lại thành sai (ví dụ tạo năm học kéo dài 1 tuần, sau đó tạo học kì trong tuần đó rồi sửa lại thành ngoài tuần đó)
+    Xem lại các field của filter, sort LeftPanel và RightPanel
+Quản lý tổ chức:
+    Cần thêm mã hóa tổ chức
+    Xem lại các field của filter, sort LeftPanel và RightPanel
+    Danh sách chờ tham gia tổ chức: 
+        Sửa UI hiển thị thành bảng, select hàng loạt, filter sort search và hiển thị nhiều thông tin hơn để biết rõ người dùng đó là ai
+        Show toàn bộ lịch sử duyệt, hiện đang chỉ lọc pending
+Quản lý người dùng:
+    Check lại xem update người dùng còn lỗi ko 
+Quản lý hoạt động:
+    Chưa hiển thị hết attributes, thiếu vài cái như parent_activity_id,...
+    Tối ưu lại về số cột vì đang nhiều cột quá khó quản lý thông tin
+    Làm calendar view để quản lý theo khe thời gian
+    Tạo progress view kéo thả hoạt động như trello và notion
+    Làm các tab riêng cho NCKH, NVSP, Đoàn, Khác
+Khám phá tổ chức:
+    Thêm file đính kèm (CV)
+Tài khoản:
+    Hoàn thiện các tab khác
